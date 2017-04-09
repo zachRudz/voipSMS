@@ -10,6 +10,19 @@ require_once('sql/dbinfo.php');
 		be sorted out by a jquery datatable.
 */
 function listContacts() {
+	// Printing the header and beginning of the body
+	echo '<table id="contacts" class="display">
+	<thead>
+		<tr>
+			<th>First name</th>
+			<th>Last name</th>
+			<th>Phone number</th>
+			<th>Notes</th>
+		</tr>
+	</thead>
+	<tbody>';
+
+	// Begin printing the body of the table
 	try {
 		$db = connectToDB();
 
@@ -30,6 +43,10 @@ function listContacts() {
 	} catch(Exception $e) {
 		echo "<div id='error'>Exception caught: " . $e->getMessage() . "</div>";
 	}
+
+	// Closing table
+	echo '</tbody>
+	</table>';
 }
 
 
@@ -59,27 +76,22 @@ function listContacts() {
 <?php 
 	include_once("header.php");
 
+	// Tell off the user if they're not logged in
+	if(isset($_SESSION['auth'])) {
+		// We're logged in, clear to print the contacts
+
+		echo '<h3>Contact List</h3>
+		<div id="addContacts">
+			<a href="addContact.php">Add a contact</a>
+		</div>';
+
+		listContacts();		
+	} else {
+		// User isn't logged in, tell them
+		echo '<div id="error">'; 
+		echo "Error: You can't add a contact while you're logged out.</div>";
+	}
+
 ?>
-<h3>Contact List<h3>
-<div id="addContacts">
-	<a href="addContact.php">Add a contact</a>
-</div>
-<div>
-<table id="contacts" class="display">
-	<thead>
-		<th>
-			<td>First name</td>
-			<td>Last name</td>
-			<td>Phone number</td>
-			<td>Notes</td>
-		</th>
-	</thead>
-	<tbody>
-	<?php
-		listContacts();
-	?>
-	</tbody>
-</table>
-</div>
 </body>
 </html>

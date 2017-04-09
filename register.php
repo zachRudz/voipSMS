@@ -1,4 +1,6 @@
 <?php
+session_start();
+
 /**************************************************
 	Print registration form
 	
@@ -109,6 +111,7 @@ function createUser() {
 		}
 	} else {
 		// Not all of the form elements are there.
+		$validated = False;
 		$errors[] = "Form wasn't completely filled out";
 	}
 	
@@ -160,7 +163,6 @@ function createUser() {
 </head>
 <body>
 <?php 
-	session_start();
 	require_once('header.php');
 
 	// If the form was submitted, attempt to create a user.
