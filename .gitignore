@@ -1,5 +1,5 @@
 upload.sh
-*.txt
+notes/*.txt
 template.php
 sql/dbinfo.php
 API/

@@ -18,6 +18,20 @@
 }
 
 /**************************************************
+	General pages
+
+	These are elements that will appear in most pages.
+*/
+div.warning {
+	border: 1% solid yellow;	
+	background-color: yellow;
+}
+
+div.error {
+	border: 1% solid red;	
+}
+
+/**************************************************
 	Contacts table
 
 	This is the Jquery Datatable that will store the user's contacts list

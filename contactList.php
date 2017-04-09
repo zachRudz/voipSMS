@@ -14,6 +14,8 @@ function listContacts() {
 	echo '<table id="contacts" class="display">
 	<thead>
 		<tr>
+			<th>Send text</th>
+			<th>Edit contact</th>
 			<th>First name</th>
 			<th>Last name</th>
 			<th>Phone number</th>
@@ -34,6 +36,8 @@ function listContacts() {
 		// Looping through data
 		while($data_array = $select_stmt->fetch(PDO::FETCH_ASSOC)) {
 			echo "<tr>";
+			echo "<td><a href='sms.php'>Text</a></td>";
+			echo "<td><a href='editContact.php'>Edit</a></td>";
 			echo "<td>{$data_array['firstName']}</td>";
 			echo "<td>{$data_array['lastName']}</td>";
 			echo "<td>{$data_array['did']}</td>";

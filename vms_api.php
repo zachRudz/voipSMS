@@ -67,4 +67,36 @@ function getSMS($api_username, $base64_api_password, $from, $to, $contact, $limi
 	return makeRestCall($parameters);
 }
 
+function getSMS_db($userID, $from, $to, $contact, $limit) {
+	require_once('sql/dbinfo.php');
+	$db = connectToDB();
+
+	// Getting the user from the DB
+	$select_stmt = $db->prepare("SELECT userID, vms_email, vms_apiPassword
+		FROM `users` WHERE userID = :userID");
+	$select_stmt->bindValue(":userID", $userID);
+	$select_stmt->execute();
+
+	// If we've found the user, make the rest call using the found parameters
+	if($select_stmt->rowCount() == 1) {
+		$userData = $select_stmt->fetchAll(PDO::FETCH_ASSOC);
+
+		// Un-Obfuscating the api password in the db
+		$api_password = base64_decode($userData[0]["vms_apiPassword"]);
+
+		$parameters = array("api_username"=>$userData[0]["vms_email"],
+			"api_password"=>$api_password,
+			"method"=>"getSMS",
+			"from"=>$from,
+			"to"=>$to,
+			"contact"=>$contact,
+			"limit"=>$limit);
+
+		return makeRestCall($parameters);
+	} else {
+		// No user with that ID found; Return an array of status="userID_not_found""
+		return array("status"=>"userID_not_found");
+	}
+}
+
 ?>

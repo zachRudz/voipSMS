@@ -9,7 +9,7 @@ session_start();
 function printRegistrationForm() {
 	// Let the user know that they need to enable API access on their
 	//		voip.ms account before registering.
-	echo '<div>
+	echo '<div class="warning">
 		Note: The VoIP.ms API is not enabled by default. You must enable API access
 		on your VoIP.ms account before registering. You can allow the 
 		API Access from within your account, by following these steps:
