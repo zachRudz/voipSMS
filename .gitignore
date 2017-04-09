@@ -1,0 +1,5 @@
+upload.sh
+*.txt
+template.php
+sql/dbinfo.php
+API/

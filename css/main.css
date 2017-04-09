@@ -1,0 +1,27 @@
+/**************************************************
+	Everything 
+
+	Manually setting the padding/margin because not all browsers act the same way by default
+*/
+* {
+	padding: 0px;
+	margin: 0px;
+}
+
+/**************************************************
+	Header
+
+	This is the banner of the website that would appear on all pages
+*/
+#banner {
+	border-bottom: 2px solid black;
+}
+
+/**************************************************
+	Contacts table
+
+	This is the Jquery Datatable that will store the user's contacts list
+*/
+table#contacts {
+	width: 100%;
+}
