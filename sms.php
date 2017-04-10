@@ -20,9 +20,13 @@ require_once('conversationHistory.php');
 		</div>';
 	} else {
 		// Determine what to show the user
+
 		if($_SERVER['REQUEST_METHOD'] == "GET") {
+			// No contact selected to text; Let them search through a history of conversations,
+			//	or select a contact from the contact menu
 			displayConversationSearchForm();
 		} else if($_SERVER['REQUEST_METHOD'] == "POST") {
+
 			// If the user wants to search for a history of conversations
 			if($_POST['submit'] = "search") {
 				// Validate that the post data is all there
@@ -30,10 +34,27 @@ require_once('conversationHistory.php');
 					&& isset($_POST['to'])
 					&& isset($_POST['contact'])
 					&& isset($_POST['limit'])) {
-					searchForConversation($_POST['to'],
+					$smsSearchResults = searchForConversation($_POST['to'],
 						$_POST['from'],
+						$_POST['did'],
 						$_POST['contact'],
 						$_POST['limit']);
+					
+					// Make sure we didn't bork
+					if($smsSearchResults['status'] != "success") {
+						// Conversation search failed
+						// Let the user know why
+						echo '<div class="error">
+							Error: Conversation search failed. Reasons:
+							<ul>';
+						foreach($smsSearchResults['errors'] as $errors) {
+							echo "<li>{$errors}</li>";
+						}
+						echo '</ul></div>';
+					}
+
+					// Conversation search succeeded, display results
+					displayConversations($smsSearchResults);
 				} else { 
 					// Conversation form wasn't filled out properly. Complain moar
 					echo '<div class="error">

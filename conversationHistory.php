@@ -1,5 +1,6 @@
 <?php
 require_once('sql/dbinfo.php');
+require_once('sql/dbQueries.php');
 require_once('vms_api.php');
 
 /**************************************************
@@ -13,6 +14,9 @@ require_once('vms_api.php');
 		- Limit (how many texts to search for)
 */
 function displayConversationSearchForm() {
+	// Getting the list of the user's DIDs
+	$dids = getDIDS($_SESSION['auth_info']['userID']);
+
 	echo '<div id="conversationFilter">';
 	echo '	<h3>Search for a Conversation</h3>';
 	echo '	<form action="sms.php" method="post">';
@@ -21,6 +25,15 @@ function displayConversationSearchForm() {
 
 	echo '		<label>To</label>';
 	echo '		<input type="date" name="to" />';
+
+	// Printing all of the user's dids
+	echo '		<label>Your number</label>';
+	echo '		<select name="did">';
+	echo "		<option value='any'>Any</option>";
+	foreach($dids as $d) {
+		echo "		<option value={$d['did']}>{$d['did']}</option>";
+	}
+	echo '		</select>';
 
 	echo '		<label>Target Contact</label>';
 	echo '		<input type="number" name="contact" />';
@@ -43,12 +56,13 @@ function displayConversationSearchForm() {
 		$return['status'] => "True"/"False"
 		$return['errors'] => []		
 	 	$return['messages'][$userDID] =>
-			[id] => 111120
-			[date] => 2014-03-30 10:24:16
-			[type] => 0
-			[did] => 8574884828
-			[contact] => 8577884821
-			[message] => hello+john
+			[$contact] =>
+				[id] => 111120
+				[date] => 2014-03-30 10:24:16
+				[type] => 0
+				[did] => 8574884828
+				[contact] => 8577884821
+				[message] => hello+john
 	
 	where...
 		id => Primary key on VMS DB
@@ -58,7 +72,7 @@ function displayConversationSearchForm() {
 		contact => Contact number for Filtering SMSs (Example: 5551234567)
 		message => SMS payload
 */
-function searchForConversation($to, $from, $contact, $limit) {
+function searchForConversation($to, $from, $did, $contact, $limit) {
 	$return = array();
 	$return['status'] = True;
 	$errors = array();
@@ -86,8 +100,6 @@ function searchForConversation($to, $from, $contact, $limit) {
 	$toDate = DateTime::createFromFormat("Y-m-d", $to);
 	if($fromDate > $toDate) {
 		$return['status'] = False;
-		echo "from: {$from}";
-		echo "<br />to: {$to}<br />";
 		$errors[] = "To date cannot come before From date.";
 	}
 
@@ -101,44 +113,111 @@ function searchForConversation($to, $from, $contact, $limit) {
 	// Testing if we've failed validation
 	if($return['status'] == False) {
 		$return['errors'] = $errors;
-
-		echo "Return:<br />";
-		print_r($return);
 		return $return;
 	}
 
 
 	// -- Get the SMS messages --
-	$smsSearch = getSMS_db($_SESSION["auth_info"]["userID"],
-		$from, $to, $contact, $limit);
+	// Limit to just one DID or all dids?
+	// ie; Did the user input a $did to filter for?
+	if(trim($did) == "any") {
+		$smsSearch = getSMS_allDIDS($_SESSION["auth_info"]["userID"],
+			$from, $to, $contact, $limit);
+	} else {
+		$smsSearch = getSMS($_SESSION["auth_info"]["userID"],
+			$from, $to, $did, $contact, $limit);
+	}
 
-
-	echo "Return:<br />";
-	print_r($return);
-	echo "<br />smsSearch:<br />";
-	print_r($smsSearch);
-	return;
 	// If the SMS search failed, return immediately
 	if($smsSearch['status'] != "success") {
+		$smsSearch['errors'] = array($smsSearch['status']);
 		return $smsSearch;
 	}
 
-	echo "Return:<br />";
-	print_r($return);
-	echo "<br />smsSearch:<br />";
-	print_r($smsSearch);
-	return;
-
 	// -- Parsing the messages --
-	// We want a nice clean array as described above, so we can cleanly iterate 
-	//		through it later
-	//foreach($smsSearch['sms'] as $sms) {
-	//		
-	//}
-	//$return['messages'] = array();
-	//
+	// We want a nice clean array, so we can cleanly iterate through it later.
+	// This will allow us to isolate only SMS messages to/from a single DID,
+	//		as opposed to just bulking together messages from unrelated conversations
+	// 
+	// The format is pretty much:
+	// $return['messages'][$userDID][$contactDID] => Most recent SMS
 
-	//// -- Return --
-	//return $conversations;
+	// Loop through all of the SMS messages we just got.
+	$return['messages'] = array();
+	foreach($smsSearch['sms'] as $sms) {
+		$did = $sms['did'];
+		$contact = $sms['contact'];
+		// Testing if the array index exists for this did 
+		if(!isset($return['messages'][$did])) {
+			$return['messages'][$did] = array();	
+		}
+
+		// Testing if the array index exists for this contact
+		//if(!isset($return['messages'][$did][$contact])) {
+		//	$return['messages'][$did][$contact] = array();	
+		//}
+
+		// Set the most recent SMS for that conversation 
+		$return['messages'][$did][$contact] = $sms;
+	}
+
+	// -- Return --
+	//print_r($return);
+	return $return;
+}
+
+/**************************************************
+	Display Conversations
+
+	Given the results of the searchForConversation(), print the SMS histories in a nice
+	set of results
+*/
+function displayConversations($smsSearchResults) {
+	// Make sure that nothing borked before doing anything
+	if($smsSearchResults['status'] != "success") {
+		echo "Error: Cannot print conversation history (Search failed)";
+		return;
+	} 
+
+	// Iterate through conversation histories, and print all of the conversations to a
+	//	table to be fancied up by jquery's datatable
+	echo '<table id="conversations">
+	<thead>
+		<th>Your phone number</th>
+		<th>Their phone number</th>
+		<th>Date last messaged</th>
+		<th>Sent by</th>
+		<th>Most recent message</th>
+	</thead>
+	<tbody>';
+
+	// Looping through each user DID, target contact, and most recent SMS
+	foreach($smsSearchResults['messages'] as $did) {
+		foreach($did as $contact) {
+			// Opting out to format date
+			// I don't think datatables would sort dates as strings properly
+			//$date = Date::createFromFormat("Y-m-d H:I:s", $sms["date"]);
+
+			echo '<tr>';
+			echo "<td>{$contact["did"]}</td>";
+			echo "<td>{$contact["contact"]}</td>";
+			echo "<td>{$contact["date"]}</td>";
+
+			// Did the user send or recieve the SMS?
+			// 0: Sent
+			// 1: Recieved
+			if($contact["type"] == 0) {
+				echo "<td>You</td>";
+			} else {
+				echo "<td>Them</td>";
+			}
+
+			echo "<td>{$contact["message"]}</td>";
+			echo '</tr>';
+			
+		}
+	}
+	
+	echo '</tbody></table>';
 }
 ?>
