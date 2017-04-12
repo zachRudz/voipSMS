@@ -29,6 +29,8 @@ div.warning {
 
 div.error {
 	border: 1% solid red;	
+	background-color: red;
+}
 }
 
 /**************************************************

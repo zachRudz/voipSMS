@@ -1,4 +1,32 @@
 <?php
+/**************************************************
+	-- Conversations --
+
+	This file contains functions related to bulk conversations
+	IE: The set of conversations between a user DID and a contact number
+		(User phone number 1) <-> (123 123 1234)
+		(User phone number 2) <-> (123 123 1234)
+		(User phone number 1) <-> (555 555 5555)
+	
+	With these functions, you can search for a set of conversations
+	based on a time frame, user/contact phone numbers, and the number of texts
+	to search for.
+
+	-- Functions --
+	displayConversationSearchForm()
+	searchForConversations()
+	displayConversations()
+
+**************************************************/
+
+// Including jquery and datatables.
+// Just in case it's not already imported, import the scripts and CSS.
+?>
+<script src="//code.jquery.com/jquery-1.12.0.min.js"></script>
+<script src="//cdn.datatables.net/1.10.13/js/jquery.dataTables.min.js"></script>
+<link rel="stylesheet" type="text/css" href="//cdn.datatables.net/1.10.13/css/jquery.dataTables.min.css" />
+
+<?php
 require_once('sql/dbinfo.php');
 require_once('sql/dbQueries.php');
 require_once('vms_api.php');
@@ -178,6 +206,15 @@ function displayConversations($smsSearchResults) {
 		echo "Error: Cannot print conversation history (Search failed)";
 		return;
 	} 
+
+	// Print the jquery function to format the datatable
+	echo ' <script>                          
+	$(document).ready(function(){ 
+		$("#conversations").DataTable({
+			"pageLength": 25      
+		});                       
+	});                           
+	</script>';
 
 	// Iterate through conversation histories, and print all of the conversations to a
 	//	table to be fancied up by jquery's datatable

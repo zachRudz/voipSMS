@@ -51,6 +51,7 @@ function printRegistrationForm() {
 */
 function createUser() {
 	require_once('sql/dbinfo.php');
+	require_once('sql/dbQueries.php');
 	require_once('vms_api.php');
 	$db = connectToDB();
 
@@ -138,7 +139,7 @@ function createUser() {
 	$add_stmt->bindValue(":userPassword", trim($_POST['password']));
 	$add_stmt->bindValue(":name", trim($_POST['name']));
 	$add_stmt->execute();
-	
+
 	if($add_stmt->rowCount() != 1) {
 		$errors[] = "There was a problem saving your data to the database. Please try again later.";
 
@@ -150,7 +151,17 @@ function createUser() {
 		}
 		echo '</ul>';
 	} else {
-		echo "Added user successfully.";
+		echo "Added user successfully. <br />";
+
+		// -- Adding user's DIDs to the db --
+		// We need the user's user ID first though.	
+		$user = getUserFromLogin($_POST['vms_email'], $_POST['password']);
+		if($user == False) {
+			echo "Unable to add DIDs; User not found in DB.";
+			return;
+		}
+
+		syncUserDIDs($user[0]['userID']);
 	}
 }
 ?>

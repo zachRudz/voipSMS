@@ -21,39 +21,22 @@ function printLoginPage($message) {
 
 function loginUser() {
 	session_start();
-	require_once("sql/dbinfo.php");
-	$db = connectToDB();
+	require_once("sql/dbQueries.php");
 
-	// Validating user login against db
-	$stmt = $db->prepare("SELECT userID, vms_email, vms_apiPassword, name
-		FROM users WHERE
-		vms_email=:vms_email AND userPassword=SHA2(:userPassword,256)");
+	// Fetching user data from login data
+	$userData = getUserFromLogin($_POST['vms_email'], $_POST['userPassword']);
 
-	$stmt->bindValue(":vms_email", trim($_POST['vms_email']));
-	$stmt->bindValue(":userPassword", trim($_POST['userPassword']));
-	$stmt->execute();
-	
-	// Checking if we've got a match
-	if($stmt->rowCount() == 1) {
+	if($userData == False) {
+		printLoginPage("The login information supplied is not valid.");
+		return;
+	} else {
 		// Saving the user's info in a session variable
 		$_SESSION['auth'] = TRUE;
-
-		// Copying the user's db info to the session variable
-		// $_SESSION['auth'] => True
-		// $_SESSION['auth_info'] => 
-		//		['userID']	
-		//		['vms_email']	
-		//		['vms_apiPassword'] (base64 encoded)
-		//		['name']
-		$userData = $stmt->fetchAll(PDO::FETCH_ASSOC);
 		$_SESSION['auth_info'] = $userData[0];
-		
+
 		// Head back home
 		header("Location: index.php");
 		return;
-	} else {
-		// Login failed. Tell the user
-		printLoginPage("The login information supplied is not valid.");
 	}
 }
 

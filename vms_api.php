@@ -118,31 +118,101 @@ function getSMS($userID, $from, $to, $did, $contact, $limit) {
 	$db = connectToDB();
 
 	// Getting the user from the DB
-	$select_stmt = $db->prepare("SELECT userID, vms_email, vms_apiPassword
-		FROM `users` WHERE userID = :userID");
-	$select_stmt->bindValue(":userID", $userID);
-	$select_stmt->execute();
-
-	// If we've found the user, make the rest call using the found parameters
-	if($select_stmt->rowCount() == 1) {
-		$userData = $select_stmt->fetchAll(PDO::FETCH_ASSOC);
-
-		// Un-Obfuscating the api password in the db
-		$api_password = base64_decode($userData[0]["vms_apiPassword"]);
-
-		$parameters = array("api_username"=>$userData[0]["vms_email"],
-			"api_password"=>$api_password,
-			"method"=>"getSMS",
-			"from"=>$from,
-			"to"=>$to,
-			"did"=>$did,
-			"contact"=>$contact,
-			"limit"=>$limit);
-
-		return makeRestCall($parameters);
-	} else {
+	$userData = getUserAPICredentials($userID);
+	if($userData->rowCount() != 1) {
 		// No user with that ID found; Return an array of status="userID_not_found""
 		return array("status"=>"userID_not_found");
 	}
+
+	// If we've found the user, make the rest call using the found parameters
+	// Un-Obfuscating the api password in the db
+	$api_password = base64_decode($userData[0]["vms_apiPassword"]);
+
+	$parameters = array("api_username"=>$userData[0]["vms_email"],
+		"api_password"=>$api_password,
+		"method"=>"getSMS",
+		"from"=>$from,
+		"to"=>$to,
+		"did"=>$did,
+		"contact"=>$contact,
+		"limit"=>$limit);
+
+	return makeRestCall($parameters);
 }
+
+/**************************************************
+	DIDs
+
+	Returns the information about all of the user's DIDs
+*/
+function getUserDIDs($userID) {
+	require_once('sql/dbinfo.php');
+	$db = connectToDB();
+
+	// Getting the user from the DB
+	$userData = getUserAPICredentials($userID);
+	if(count($userData) != 1) {
+		// No user with that ID found; Return an array of status="userID_not_found""
+		return array("status"=>"userID_not_found");
+	}
+
+	// If we've found the user, make the rest call using the found parameters
+	// Un-Obfuscating the api password in the db
+	$api_password = base64_decode($userData[0]["vms_apiPassword"]);
+
+	$parameters = array("api_username"=>$userData[0]["vms_email"],
+		"api_password"=>$api_password,
+		"method"=>"getDIDsInfo");
+
+	return makeRestCall($parameters);
+}
+
+/**************************************************
+	Sync user DIDs
+	
+	This script will remove all the user's dids from the db. and add all the dids
+	from the voip.ms servers.
+*/
+function syncUserDIDs($userID) {
+	// Makes sure that the user ID is set
+	if(!isset($userID)) {
+		return False;
+	}
+	
+	// Getting new DIDS
+	// Doing this first so that if something borks, then we don't wipe the user's DIDS
+	//  when we can't replace them
+	$dids = getUserDIDs($userID);
+	if($dids['status'] != "success") {
+		echo "<div class='error'>Error: Couldn't fetch the user's DIDs from voip.ms server. 
+			(Reason: {$dids['status']}) </div>";
+		return;
+	}
+	
+	// Clears all of the DIDS for this user
+	deleteUserDIDS($userID);
+	
+	// Adding the dids we just got from the vms server
+	// Making a standalone DB call here since it's more efficient to reuse an insert statement
+	//  than setting up PDO every time
+	try {
+		$db = connectToDB();
+		
+		$query = "INSERT INTO `dids` (ownerID, did) VALUES (:ownerID, :did)";
+		$insert_stmt = $db->prepare($query);
+		$insert_stmt->bindValue("ownerID", $userID);
+		
+		// Looping through all the DIDs we just found
+		foreach($dids['dids'] as $d) {
+			echo "Added user DID [{$d['did']}]<br />";
+			$insert_stmt->bindValue("did", $d['did']);
+			$insert_stmt->execute();
+		}
+	} catch(Exception $e) {
+		echo "<div class='error'>Exception: " . $e->getMessage() ."</div>";
+		return;
+	}
+}
+
+
 ?>
