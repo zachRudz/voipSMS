@@ -43,7 +43,7 @@ require_once('vms_api.php');
 */
 function displayConversationSearchForm() {
 	// Getting the list of the user's DIDs
-	$dids = getDIDS($_SESSION['auth_info']['userID']);
+	$dids = getDIDs($_SESSION['auth_info']['userID']);
 
 	echo '<div id="conversationFilter">';
 	echo '	<h3>Search for a Conversation</h3>';
@@ -67,7 +67,7 @@ function displayConversationSearchForm() {
 	echo '		<input type="number" name="contact" />';
 
 	echo '		<label>Limit of texts to search</label>';
-	echo '		<input type="number" name="limit" min="0" />';
+	echo '		<input type="number" name="limit" min="0" value="25" />';
 
 	echo '		<input type="submit" name="submit" value="search" />';
 	echo '	</form>';
@@ -115,26 +115,30 @@ function searchForConversation($to, $from, $did, $contact, $limit) {
 	$regexDateMatch = "/\d{4}-\d{2}-\d{2}/";
 
 	if(!preg_match($regexDateMatch, $from)) {
-		$return['status'] = False;
-		$errors[] = "From date is not valid.";
+		if(trim($from) == "") {
+			$from = Date("Y-m-d");
+		} else {
+			$return['status'] = False;
+			$errors[] = "From date is not valid.";
+		}
 	}
 	if(!preg_match($regexDateMatch, $to)) {
-		$return['status'] = False;
-		$errors[] = "To date is not valid.";
-	}
-	
-	// Make sure the date range is valid
-	$fromDate = DateTime::createFromFormat("Y-m-d", $from);
-	$toDate = DateTime::createFromFormat("Y-m-d", $to);
-	if($fromDate > $toDate) {
-		$return['status'] = False;
-		$errors[] = "To date cannot come before From date.";
+		if(trim($to) == "") {
+			$to = Date("Y-m-d");
+		} else {
+			$return['status'] = False;
+			$errors[] = "To date is not valid.";
+		}
 	}
 
 	// Make sure the limit is a positive value
 	if($limit < 1) {
-		$return['status'] = False;
-		$errors[] = "Limit is not valid";
+		if(trim($limit) == "") {
+			$limit = "25";
+		} else {
+			$return['status'] = False;
+			$errors[] = "Limit is not valid";
+		}
 	}
 
 
@@ -220,6 +224,7 @@ function displayConversations($smsSearchResults) {
 	//	table to be fancied up by jquery's datatable
 	echo '<table id="conversations">
 	<thead>
+		<th>Text</th>
 		<th>Your phone number</th>
 		<th>Their phone number</th>
 		<th>Date last messaged</th>
@@ -236,6 +241,7 @@ function displayConversations($smsSearchResults) {
 			//$date = Date::createFromFormat("Y-m-d H:I:s", $sms["date"]);
 
 			echo '<tr>';
+			echo "<td><a href='sms.php?target=" . $contact["contact"] . "'>Text</a></td>";
 			echo "<td>{$contact["did"]}</td>";
 			echo "<td>{$contact["contact"]}</td>";
 			echo "<td>{$contact["date"]}</td>";

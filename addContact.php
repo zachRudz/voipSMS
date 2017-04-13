@@ -81,7 +81,8 @@ function createContact() {
 		}
 		echo '</ul>';
 	} else {
-		echo "Added contact successfully.";
+		echo "Added contact successfully.<br />";
+		printAddContactForm();                                         
 	}
 }
 ?>

@@ -31,7 +31,6 @@ div.error {
 	border: 1% solid red;	
 	background-color: red;
 }
-}
 
 /**************************************************
 	Contacts table
@@ -40,4 +39,35 @@ div.error {
 */
 table#contacts {
 	width: 100%;
+}
+
+
+/**************************************************
+	Conversations
+
+	This is the actual SMS conversation, and bulk SMS conversation related
+*/
+/* -- Messages -- */
+div.message {
+	width: 80%;
+}
+
+div.message.recieved {
+	float: left;
+}
+
+div.message.sent {
+	float: right;
+}
+
+div.messagePayload {
+	border: 1px solid black;	
+}
+
+div.message.recieved > .messagePayload {
+	background-color: green;	
+}
+
+div.message.sent > .messagePayload {
+	background-color: blue;	
 }
