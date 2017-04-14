@@ -100,7 +100,7 @@ function displayConversationSearchForm() {
 		contact => Contact number for Filtering SMSs (Example: 5551234567)
 		message => SMS payload
 */
-function searchForConversation($to, $from, $did, $contact, $limit) {
+function searchForConversation($from, $to, $did, $contact, $limit) {
 	$return = array();
 	$return['status'] = True;
 	$errors = array();

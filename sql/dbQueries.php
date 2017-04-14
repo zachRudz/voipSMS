@@ -109,4 +109,33 @@ function getUserFromLogin($vms_email, $vms_password) {
 		return False;
 	}
 }
+
+/**************************************************
+	Get Contacts
+
+	Returns an array of all the user's contacts
+*/
+function getContacts($userID) {
+	// Getting all DIDs for this user
+	try {
+		$db = connectToDB();                                                 
+
+		// Validating user login against db                                  
+		// Getting all of the contacts for this user                                    
+		$select_stmt = $db->prepare("SELECT * FROM `contacts` WHERE ownerID = :userID");
+		$select_stmt->bindValue(":userID", $userID);     
+		$select_stmt->execute();
+
+		// Checking if we've got a match                                     
+		if($stmt->rowCount() == 1) {                                         
+			$userData = $select_stmt->fetchAll(PDO::FETCH_ASSOC);                   
+			return $userData;
+		} else {
+			return False;
+		}
+	} catch(Exception $e) {
+		echo "<div class='error'>Exception caught: " . $e->getMessage() . "</div>";
+		return False;
+	}
+}
 ?>

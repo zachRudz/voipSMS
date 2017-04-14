@@ -3,13 +3,24 @@ session_start();
 require_once('sql/dbinfo.php');
 require_once('vms_api.php');
 require_once('conversationHistory.php');
+require_once("smsConversation.php");
 ?>
 <!DOCTYPE html>
 <html>
 <head>
 	<link rel="stylesheet" type="text/css" href="css/main.css" />
 	<title>voipSMS: SMS Center</title>
+
+	<script src="//code.jquery.com/jquery-1.12.0.min.js"></script>
+	<script src="//cdn.datatables.net/1.10.13/js/jquery.dataTables.min.js"></script>
+	<link rel="stylesheet" type="text/css" href="//cdn.datatables.net/1.10.13/css/jquery.dataTables.min.css" />
 	<script>
+		// JQuery DataTable stuff for the contact pane
+		$(document).ready(function(){
+			$('#contactPaneContacts').DataTable({
+				"pageLength": 25
+			});
+		});
 		/**************************************************
 		 Spicey scriptaroonie to jump to the bottom of the webpage when the page loads
 
@@ -30,64 +41,82 @@ require_once('conversationHistory.php');
 		Error: You must be logged in first.
 		</div>';
 	} else {
+		// Test if the user got here via changing their active DID.
+		// If so, set the $_SESSION variable accordingly and continue doing 
+		//	whatever they were doing.
+		// $_REQUEST['target'] should be set if they were in a conversation.
+		if(isset($_REQUEST['activeDID'])) {
+			$_SESSION['auth_info']['activeDID'] = htmlspecialchars($_REQUEST['activeDID']);
+		}
+
+		// Print the conversation pane
+		// This will be a nifty lil side panel with links to text your contacts,
+		// switch your active DID, and text new numbers 
+		if(isset($_REQUEST['target'])) {
+			displayContactPane($_SESSION['auth_info']['userID'], $_REQUEST['target']);
+		} else {
+			displayContactPane($_SESSION['auth_info']['userID'], "");
+		}
+
 		// Determine what to show the user
 		// If the user has clicked a link to text a contact DID
 		if(isset($_REQUEST['target'])) {
-			require_once("smsConversation.php");
-			/***************************************************************************
-				SMS Conversation
 
-				A conversation is an SMS chat between a user DID and an
-				arbitrary target DID.
+			// Making sure that $target isn't an empty string.
+			// If it were, getSMS() would fetch contacts from EVERYONE
+			if(trim($_REQUEST['target']) != "") {
+				/***************************************************************************
+					SMS Conversation
 
-				Actions:
-					- Display a form to filter for SMS messages by this user
-					- Retrieve the SMS history from this user
-					- Form to send SMS message
+					A conversation is an SMS chat between a user DID and an
+					arbitrary target DID.
 
-			***************************************************************************/
-			// Getting filter results, if any
-			$to = "";
-			$from = "";
-			$limit = "25";
-			$_SESSION['auth_info']['activeDID'] = "5199903661";
+					Actions:
+						- Display a form to filter for SMS messages by this user
+						- Retrieve the SMS history from this user
+						- Form to send SMS message
 
-			// Filter dates
-			if(isset($_REQUEST['to']))
-				$to = $_REQUEST['to'];	
+				***************************************************************************/
+				// Getting filter results, if any
+				$to = "";
+				$from = "";
+				$limit = "25";
+				echo "Active DID: {$_SESSION['auth_info']['activeDID']}";
 
-			if(isset($_REQUEST['from']))
-				$from = $_REQUEST['from'];	
+				// Filter dates
+				if(isset($_REQUEST['to']))
+					$to = $_REQUEST['to'];	
 
-			// Filter limit
-			if(isset($_REQUEST['limit']))
-				$limit = $_REQUEST['limit'];	
+				if(isset($_REQUEST['from']))
+					$from = $_REQUEST['from'];	
 
-			$convo = getConversation($_SESSION['auth_info']['userID'],
-				$to, $from,
-				$_SESSION['auth_info']['activeDID'],
-				$_REQUEST['target'],
-				$limit);
+				// Filter limit
+				if(isset($_REQUEST['limit']))
+					$limit = $_REQUEST['limit'];	
 
-			// Display the conversation filter
-			displaySMSConversationSearchForm($_REQUEST['target']);
+				$convo = getConversation($_SESSION['auth_info']['userID'],
+					$from, $to,
+					$_SESSION['auth_info']['activeDID'],
+					$_REQUEST['target'],
+					$limit);
 
-			echo "to: [{$to}] <br />";
-			echo "from: [{$from}]<br />";
-			echo "did: [{$_SESSION['auth_info']['activeDID']}]<br />";
-			echo "contact: [{$_REQUEST['target']}]<br />";
-			echo "limit: [{$limit}]<br />";
-			echo "<br />";
-			print_r($_SESSION['auth_info']);
-			echo "<br />";
-			print_r($convo);
+				// Display the conversation filter
+				displaySMSConversationSearchForm($_REQUEST['target']);
 
-			// Print the conversation
-			displayConversationHistory($convo);
+				//echo "to: [{$to}] <br />";
+				//echo "from: [{$from}]<br />";
+				//echo "did: [{$_SESSION['auth_info']['activeDID']}]<br />";
+				//echo "contact: [{$_REQUEST['target']}]<br />";
+				//echo "limit: [{$limit}]<br />";
+				//echo "<br />";
+				//print_r($_SESSION['auth_info']);
+				//echo "<br />";
+				//print_r($convo);
 
+				// Print the conversation
+				displayConversationHistory($convo);
 
-
-
+			} // Make sure $target != ""
 		} else {
 
 			/***************************************************************************
@@ -108,8 +137,8 @@ require_once('conversationHistory.php');
 						&& isset($_POST['to'])
 						&& isset($_POST['contact'])
 						&& isset($_POST['limit'])) {
-						$smsSearchResults = searchForConversation($_POST['to'],
-							$_POST['from'],
+						$smsSearchResults = searchForConversation($_POST['from'],
+							$_POST['to'],
 							$_POST['did'],
 							$_POST['contact'],
 							$_POST['limit']);

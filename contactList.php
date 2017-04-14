@@ -1,6 +1,7 @@
 <?php
 session_start();
 require_once('sql/dbinfo.php');
+require_once('sql/dbQueries.php');
 
 /**************************************************
 	List Contacts

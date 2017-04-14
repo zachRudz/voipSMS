@@ -65,9 +65,9 @@ div.messagePayload {
 }
 
 div.message.recieved > .messagePayload {
-	background-color: green;	
+	background-color: #77f442;	
 }
 
 div.message.sent > .messagePayload {
-	background-color: blue;	
+	background-color: #41c3f2;	
 }
