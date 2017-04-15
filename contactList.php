@@ -38,7 +38,7 @@ function listContacts() {
 		while($data_array = $select_stmt->fetch(PDO::FETCH_ASSOC)) {
 			echo "<tr>";
 			echo "<td><a href='sms.php?target=" . $data_array['did'] . "'>Text</a></td>";
-			echo "<td><a href='editContact.php'>Edit</a></td>";
+			echo "<td><a href='editContact.php?contactID={$data_array['contactID']}'>Edit</a></td>";
 			echo "<td>{$data_array['firstName']}</td>";
 			echo "<td>{$data_array['lastName']}</td>";
 			echo "<td>{$data_array['did']}</td>";

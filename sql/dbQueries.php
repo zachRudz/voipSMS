@@ -111,28 +111,81 @@ function getUserFromLogin($vms_email, $vms_password) {
 }
 
 /**************************************************
-	Get Contacts
+	Get Contact
 
-	Returns an array of all the user's contacts
+	Returns the contact that was searched for, if it's owned by the correct user.
+
+	$res['status'] possible values:
+		"success": Contact found successfully. $res contains contact information.
+		"not_owner": Contact not owned by $userID. 
+		"not_found": Contact not found in DB at all.
 */
-function getContacts($userID) {
+function getContact($userID, $contactID) {
 	// Getting all DIDs for this user
 	try {
 		$db = connectToDB();                                                 
 
 		// Validating user login against db                                  
 		// Getting all of the contacts for this user                                    
-		$select_stmt = $db->prepare("SELECT * FROM `contacts` WHERE ownerID = :userID");
-		$select_stmt->bindValue(":userID", $userID);     
+		$query = "SELECT * FROM contacts WHERE contactID = :contactID";
+		$select_stmt = $db->prepare($query);
+		$select_stmt->bindValue(":contactID", $contactID);     
 		$select_stmt->execute();
 
 		// Checking if we've got a match                                     
-		if($stmt->rowCount() == 1) {                                         
+		if($select_stmt->rowCount() == 1) {                                         
 			$userData = $select_stmt->fetchAll(PDO::FETCH_ASSOC);                   
-			return $userData;
+
+			if($userData[0]['ownerID'] != $userID)
+				return array("status"=>"not_owner");
+
+			$userData[0]['status'] = "success";
+			return $userData[0];
 		} else {
-			return False;
+			return array("status"=>"not_found");
 		}
+	} catch(Exception $e) {
+		echo "<div class='error'>Exception caught: " . $e->getMessage() . "</div>";
+		return False;
+	}
+}
+
+/**************************************************
+	Update Contact
+
+	Modifys an existing contact in the DB.
+
+	Checks to make sure that the contact actually is owned by the person first.
+*/
+function updateContact($userID, $contactID, $firstName, $lastName, $did, $notes) {
+	// Getting the contact first; To make sure they exist, and to make sure our user owns the contact
+	$contact = getContact($userID, $contactID);
+
+	// Return the contact so that the error can be parsed on failure
+	if($contact['status'] != "success")
+		return $contact;
+	
+			
+	// Begin altering the table entry
+	try {
+		$db = connectToDB();                                                 
+
+		// Begin updating the contact
+		$query = "UPDATE contacts SET firstName = :firstName,
+			lastName = :lastName,
+			did = :did,
+			notes = :notes
+			WHERE contactID = :contactID";
+
+		$stmt = $db->prepare($query);
+		$stmt->bindValue(":firstName", $firstName);     
+		$stmt->bindValue(":lastName", $lastName);     
+		$stmt->bindValue(":did", $did);     
+		$stmt->bindValue(":notes", $notes);     
+		$stmt->bindValue(":contactID", $contactID);     
+		$stmt->execute();
+
+		return array("status"=>"success");
 	} catch(Exception $e) {
 		echo "<div class='error'>Exception caught: " . $e->getMessage() . "</div>";
 		return False;
