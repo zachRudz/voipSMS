@@ -9,14 +9,21 @@ require_once('sql/dbQueries.php');
 	The contact list is stored locally in the voipSMS DB.
 	Print all of the contents to the table, which will later
 		be sorted out by a jquery datatable.
+	
+	The form correlates to a "deleteContact" action.
+	Contacts that have their checkbox marked will be deleted when the form is submitted.
 */
 function listContacts() {
+	// Spicey delete contact form
+	echo "<form action='deleteContacts.php' method='post'>";
+
 	// Printing the header and beginning of the body
 	echo '<table id="contacts" class="display">
 	<thead>
 		<tr>
 			<th>Send text</th>
 			<th>Edit contact</th>
+			<th>Delete</th>
 			<th>First name</th>
 			<th>Last name</th>
 			<th>Phone number</th>
@@ -38,7 +45,10 @@ function listContacts() {
 		while($data_array = $select_stmt->fetch(PDO::FETCH_ASSOC)) {
 			echo "<tr>";
 			echo "<td><a href='sms.php?target=" . $data_array['did'] . "'>Text</a></td>";
-			echo "<td><a href='editContact.php?contactID={$data_array['contactID']}'>Edit</a></td>";
+			echo "<td><a href='editContact.php?contactID={$data_array['contactID']}'>
+				Edit</a></td>";
+			echo "<td><input type='checkbox' name='contactID[]' 
+				value='{$data_array['contactID']}' /></td>";
 			echo "<td>{$data_array['firstName']}</td>";
 			echo "<td>{$data_array['lastName']}</td>";
 			echo "<td>{$data_array['did']}</td>";
@@ -52,6 +62,11 @@ function listContacts() {
 	// Closing table
 	echo '</tbody>
 	</table>';
+
+	// form is kill
+	// no
+	echo "<input type='submit' value='Delete marked contacts' />";
+	echo "</form>";
 }
 
 

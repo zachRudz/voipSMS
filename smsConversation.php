@@ -28,7 +28,7 @@ require_once("sql/dbQueries.php");
 */
 function displaySMSConversationSearchForm($target) {
 	echo '<div id="conversationFilter">';
-	echo '  <h3>Search for a Conversation</h3>';
+	echo '  <h3>Filter this conversation conversation</h3>';
 	echo '  <form action="sms.php" method="get">';
 	echo '      <label>From </label>';
 	echo '      <input type="date" name="from" />';

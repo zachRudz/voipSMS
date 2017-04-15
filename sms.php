@@ -81,7 +81,6 @@ require_once("smsConversation.php");
 				$to = "";
 				$from = "";
 				$limit = "25";
-				echo "Active DID: {$_SESSION['auth_info']['activeDID']}";
 
 				// Filter dates
 				if(isset($_REQUEST['to']))

@@ -191,4 +191,53 @@ function updateContact($userID, $contactID, $firstName, $lastName, $did, $notes)
 		return False;
 	}
 }
+
+/**************************************************
+	Delete Contact
+
+	Delete the contact, regardless of the owner (care).
+*/
+function deleteContact($contactID) {
+	// Getting all DIDs for this user
+	try {
+		$db = connectToDB();                                                 
+
+		// Validating user login against db                                  
+		// Getting all of the contacts for this user                                    
+		$query = "DELETE FROM contacts WHERE contactID = :contactID";
+		$select_stmt = $db->prepare($query);
+		$select_stmt->bindValue(":contactID", $contactID);     
+		$select_stmt->execute();
+	} catch(Exception $e) {
+		echo "<div class='error'>Exception caught while deleting a contact: " . $e->getMessage() . "</div>";
+		return False;
+	}
+}
+
+/**************************************************
+	Add Contact
+
+	Add the contact to the DB, regardless of errors.
+*/
+function addContact($ownerID, $firstName, $lastName, $did, $notes) {
+	try {
+		$db = connectToDB();                                                 
+
+		$query = "INSERT INTO `contacts` 
+			(`ownerID`, `firstName`, `lastName`, `did`, `notes`) 
+			VALUES (:ownerID, :firstName, :lastName, :did, :notes)";
+
+		$add_stmt = $db->prepare($query);
+		$add_stmt->bindValue(":ownerID", trim($_SESSION['auth_info']['userID']));
+		$add_stmt->bindValue(":firstName", trim($_POST['firstName']));
+		$add_stmt->bindValue(":lastName", trim($_POST['lastName']));
+		$add_stmt->bindValue(":did", trim($_POST['did']));
+		$add_stmt->bindValue(":notes", trim($_POST['notes']));
+		$add_stmt->execute();
+	} catch(Exception $e) {
+		echo "<div class='error'>Exception caught while adding contact to DB: ";
+		echo $e->getMessage() . "</div>";
+		return False;
+	}
+}
 ?>
