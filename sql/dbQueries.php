@@ -21,6 +21,10 @@ require_once('dbinfo.php');
 	updateContact()
 	deleteContact()
 	addContact()
+
+	-- Admin --
+	isAdmin()
+	deleteUsers()
 */
 
 /**************************************************
@@ -364,6 +368,59 @@ function addContact($ownerID, $firstName, $lastName, $did, $notes) {
 		$add_stmt->execute();
 	} catch(Exception $e) {
 		echo "<div class='error'>Exception caught while adding contact to DB: ";
+		echo $e->getMessage() . "</div>";
+		return False;
+	}
+}
+
+/**************************************************
+	Is Admin
+
+	Returns True/False depending on whether or not the user is
+	an admin or not.
+*/
+function isAdmin($userID) {
+	$user = getUser($userID);
+
+	if($user['userType'] == 'A')
+		return True;
+	
+	return False;
+}
+
+/**************************************************
+	Delete users
+
+	Given an array of users to delete, loop through and delete them all.
+
+	This means deleting all of their contacts, DIDs, and then the user itsself.
+*/
+function deleteUsers($userIDs) {
+	try {
+		// Looping through each user
+		foreach($userIDs as $uid) {
+			$db = connectToDB();                                                 
+
+			// Deleting all of the user's contacts
+			$query = "DELETE FROM contacts WHERE ownerID = :uid";
+			$select_stmt = $db->prepare($query);
+			$select_stmt->bindValue(":uid", $uid);     
+			$select_stmt->execute();
+
+			// Deleting all of the user's dids
+			$query = "DELETE FROM dids WHERE ownerID = :uid";
+			$select_stmt = $db->prepare($query);
+			$select_stmt->bindValue(":uid", $uid);     
+			$select_stmt->execute();
+
+			// Deleting the user
+			$query = "DELETE FROM users WHERE userID = :uid";
+			$select_stmt = $db->prepare($query);
+			$select_stmt->bindValue(":uid", $uid);     
+			$select_stmt->execute();
+		}
+	} catch(Exception $e) {
+		echo "<div class='error'>Exception caught while deleting a contact: ";
 		echo $e->getMessage() . "</div>";
 		return False;
 	}

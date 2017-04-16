@@ -59,7 +59,14 @@ function displayConversationSearchForm() {
 	echo '		<select name="did">';
 	echo "		<option value='any'>Any</option>";
 	foreach($dids as $d) {
-		echo "		<option value={$d['did']}>{$d['did']}</option>";
+		echo "		<option value'={$d['did']}'";
+		
+		// Select the current DID if it's the active DID
+		if($d['did'] == $_SESSION['auth_info']['activeDID'])
+			echo " selected";
+
+		echo ">{$d['did']}";
+		echo "</option>";
 	}
 	echo '		</select>';
 
