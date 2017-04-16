@@ -170,7 +170,7 @@ function syncUserDIDs($userID) {
 	if($dids['status'] != "success") {
 		echo "<div class='error'>Error: Couldn't fetch the user's DIDs from voip.ms server. 
 			(Reason: {$dids['status']}) </div>";
-		return;
+		return False;
 	}
 	
 	// Clears all of the DIDS for this user
@@ -192,9 +192,11 @@ function syncUserDIDs($userID) {
 			$insert_stmt->bindValue("did", $d['did']);
 			$insert_stmt->execute();
 		}
+
+		return True;
 	} catch(Exception $e) {
 		echo "<div class='error'>Exception: " . $e->getMessage() ."</div>";
-		return;
+		return False;
 	}
 }
 

@@ -1,9 +1,26 @@
 <?php
 require_once('dbinfo.php');
+
 /**************************************************
 	Local DB actions
 
 	These will be common queries done on the DB.
+
+	-- User DIDs --
+	deleteUserDIDS()
+	getDIDs()
+
+	-- Users --
+	getUserAPICredentials()
+	getUser()
+	getUserFromLogin()
+	alterUser()
+
+	-- Contacts --
+	getContact()
+	updateContact()
+	deleteContact()
+	addContact()
 */
 
 /**************************************************
@@ -75,6 +92,117 @@ function getUserAPICredentials($userID) {
 		return $res;
 	} catch(Exception $e) {
 		echo "<div class='error'>Exception caught: " . $e->getMessage() . "</div>";
+	}
+}
+
+/**************************************************
+	Get user 
+
+	Returns the all of the user's info
+*/
+function getUser($userID) {
+	// Getting all info for this user
+	try {
+		$db = connectToDB();
+		
+		// Getting all of the contacts for this user
+		$query = "SELECT * FROM `users` WHERE userID = :userID";
+
+		$select_stmt = $db->prepare($query);
+		$select_stmt->bindValue(":userID", $userID);
+		$select_stmt->execute();
+		
+		// Grab all the data
+		$res = $select_stmt->fetchAll(PDO::FETCH_ASSOC); 
+
+		// Validate
+		if(count($res) != 1)
+			return False;
+
+		return $res[0];
+	} catch(Exception $e) {
+		echo "<div class='error'>Exception caught: " . $e->getMessage() . "</div>";
+	}
+}
+
+/**************************************************
+	Alter user
+
+	Changes the values of an existing user.
+	If a value is null, don't change it.
+*/
+function alterUser($userID, $name, $vms_apiPassword, $userPassword, $currentPassword) {
+	// Making sure the user exists
+	$user = getUser($userID);
+	if($user == False) {
+		echo "<div class='error'>Cannot change user password (current password incorrect)</div>";
+		return False;
+	}
+
+	// Testing if name is null. If so, don't change it 
+	if(trim($name) == "") {
+		$new_name = $user['name'];
+	} else {
+		$new_name = $name;
+	}
+
+	// Testing if name is null. If so, don't change it 
+	if(trim($vms_apiPassword) == "") {
+		$new_vms_apiPassword = $user['vms_apiPassword'];
+	} else {
+		$new_vms_apiPassword = base64_encode($vms_apiPassword);
+	}
+
+
+	// Making sure that the user's current password is valid if they want to change it.
+	if($userPassword != "") {
+		if($user['userPassword'] != hash("sha256", $currentPassword)) {
+			// Current password doesn't validate
+			echo "<div class='error'>Cannot change user password (current password incorrect)</div>";
+			$passwordChange = False;
+		} else {
+			// Current password validates
+			$passwordChange = True;
+		}
+	} else {
+		// No password entered in form
+		$passwordChange = False ;
+	}
+
+	// Begin altering the table entry
+	try {
+		$db = connectToDB();                                                 
+
+		// Begin updating the contact
+		if($passwordChange) {
+			// User is changing their password
+			$query = "UPDATE users SET name = :name,
+				vms_apiPassword = :vms_apiPassword,
+				userPassword = SHA2(:userPassword,256)
+				WHERE userID = :userID";
+	
+			$stmt = $db->prepare($query);
+			$stmt->bindValue(":name", trim($new_name));     
+			$stmt->bindValue(":vms_apiPassword", trim($new_vms_apiPassword));     
+			$stmt->bindValue(":userPassword", trim($userPassword));     
+			$stmt->bindValue(":userID", $userID);     
+		} else {
+			// User isn't changing their password, or they failed to authenticate their password
+			$query = "UPDATE users SET name = :name,
+				vms_apiPassword = :vms_apiPassword
+				WHERE userID = :userID";
+	
+			$stmt = $db->prepare($query);
+			$stmt->bindValue(":name", trim($new_name));     
+			$stmt->bindValue(":vms_apiPassword", trim($new_vms_apiPassword));     
+			$stmt->bindValue(":userID", $userID);     
+		}
+
+		$stmt->execute();
+		return True;
+	} catch(Exception $e) {
+		echo "<div class='error'>Exception caught: " . $e->getMessage() . "</div>";
+		return False;
 	}
 }
 

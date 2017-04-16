@@ -12,7 +12,8 @@
 		echo htmlspecialchars($_SESSION['auth_info']['name'], ENT_QUOTES);
 		echo '</span>';
 		
-		echo '<a href="logout.php">Logout</a>';
+		echo '(<a href="account.php">My Account</a>, ';
+		echo '<a href="logout.php">Logout</a>)';
 		echo '<a href="sms.php">SMS Portal</a>';
 	} else {
 		// User is not logged in
