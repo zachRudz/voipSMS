@@ -15,7 +15,8 @@ require_once('sql/dbQueries.php');
 */
 function listContacts() {
 	// Spicey delete contact form
-	echo "<form action='deleteContacts.php' method='post'>";
+	echo "<form action='deleteContacts.php' method='post'";
+	echo " name='deleteContacts' onsubmit='return validateDeleteContacts()'>";
 
 	// Printing the header and beginning of the body
 	echo '<table id="contacts" class="display">
@@ -90,11 +91,56 @@ function listContacts() {
 				"pageLength": 25
 			});
 		});
+
+	// Make sure form is filled completely and such.
+	function validateDeleteContacts() {
+		var errors = [];
+		var form = document.forms['deleteContacts'];
+		var errorMessage = document.getElementById('formErrorMessage');
+		
+		// Clear error classes from inputs
+		errorMessage.classList.remove('error');
+		
+		// Clear the error div
+		errorMessage.innerHTML = "";
+		
+		// -- Begin processing form --
+		// Making sure something's checked
+		var i = 0;
+		for(i = 0; i < form['contactID[]'].length; i++) {
+			if(form['contactID[]'][i].checked) {
+				var notEmpty = true;
+			}
+			console.log("Value: " + form['contactID[]'][i].checked);
+		}
+
+		if(!notEmpty) {
+			errors.push("No contacts selected.");
+		}
+		
+		// -- Writing errors --
+		var numErrors = errors.length;
+		if(numErrors > 0) {
+			// Loop though errors and write them to the error message div
+			errorMessage.innerHTML = "Errors found while processing the form:";
+			
+			for(var i = 0; i < numErrors; i++) {
+			errorMessage.innerHTML += "<br />";
+			errorMessage.innerHTML += errors[i];
+			}
+			
+			errorMessage.classList.add('error');
+			return false;
+		}
+		
+		return true;
+	}
 	</script>
 </head>
 <body>
 <?php 
 	include_once("header.php");
+	echo "<div id='formErrorMessage'></div>";
 
 	// Tell off the user if they're not logged in
 	if(isset($_SESSION['auth'])) {
@@ -111,7 +157,6 @@ function listContacts() {
 		echo '<div id="error">'; 
 		echo "Error: You can't add a contact while you're logged out.</div>";
 	}
-
 ?>
 </body>
 </html>
