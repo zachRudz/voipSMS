@@ -111,7 +111,6 @@ function listContacts() {
 			if(form['contactID[]'][i].checked) {
 				var notEmpty = true;
 			}
-			console.log("Value: " + form['contactID[]'][i].checked);
 		}
 
 		if(!notEmpty) {

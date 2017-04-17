@@ -17,7 +17,8 @@ require_once('sql/dbQueries.php');
 */
 function displayUsers() {
 	echo "<div>";
-	echo "<form action='admin.php' method='post'>";
+	echo "<form action='admin.php' method='post'";
+	echo " name='deleteUsers' onsubmit='return validateDeleteUsers()'>";
 
 	// Building the table of users
 	echo "<table id='admin_userList' class='display'>";
@@ -91,12 +92,56 @@ function displayUsers() {
 			"pageLength": 25
 		});
 	});
+
+	// Make sure form is filled completely and such.                           
+	function validateDeleteUsers() {                                        
+		var errors = [];                                                       
+		var form = document.forms['deleteUsers'];                           
+		var errorMessage = document.getElementById('formErrorMessage');        
+		
+		// Clear error classes from inputs                                     
+		errorMessage.classList.remove('error');                                
+		
+		// Clear the error div                                                 
+		errorMessage.innerHTML = "";                                           
+		
+		// -- Begin processing form --                                         
+		// Making sure something's checked                                     
+		var i = 0;                                                             
+		for(i = 0; i < form['deletedUsers[]'].length; i++) {                      
+			if(form['deletedUsers[]'][i].checked) {                               
+				var notEmpty = true;                                           
+			}                                                                  
+		}                                                                      
+			
+		if(!notEmpty) {                                                        
+			errors.push("No users selected.");                              
+		}                                                                      
+			
+		// -- Writing errors --                                                
+		var numErrors = errors.length;                                         
+		if(numErrors > 0) {                                                    
+			// Loop though errors and write them to the error message div      
+			errorMessage.innerHTML = "Errors found while processing the form:";
+			
+			for(var i = 0; i < numErrors; i++) {                               
+				errorMessage.innerHTML += "<br />";                                
+				errorMessage.innerHTML += errors[i];                               
+			}                                                                  
+			
+			errorMessage.classList.add('error');                               
+			return false;                                                      
+		}                                                                      
+	
+		return true;                                                           
+	}                                                                          
 	</script>
 
 </head>
 <body>
 <?php 
 	include_once("header.php");
+	echo "<div id='formErrorMessage'></div>";
 
 	// Making sure we're logged in
 	if(!isset($_SESSION['auth'])) {
