@@ -27,7 +27,7 @@ require_once("sql/dbQueries.php");
 	Don't wanna.
 */
 function displaySMSConversationSearchForm($target) {
-	echo '<div id="conversationFilter">';
+	echo '<div class="formWrapper">';
 	echo '  <h3>Filter this conversation conversation</h3>';
 	echo '  <form action="sms.php" method="get">';
 	echo '      <label>From </label>';
@@ -144,16 +144,16 @@ function displayConversationHistory($conversation) {
 
 		// Different CSS for recieved/sent messages
 		if($sms['type'] == 1) {
-			echo "<div class='message recieved'>";
+			echo "<div class='sms recieved'>";
 		} else {
-			echo "<div class='message sent'>";
+			echo "<div class='sms sent'>";
 		}
 
-		echo "<div class='messagePayload'>";
+		echo "<div class='smsPayload'>";
 		echo htmlspecialchars($sms['message']);
 		echo "</div>";
 
-		echo "<div class='messageDate'>";
+		echo "<div class='smsDate'>";
 		echo $sms['date'];
 		echo "</div>";
 
@@ -260,6 +260,7 @@ function displayContactPaneContacts($userID) {
 function displayContactPane($userID, $currentContact) {
 	// Begin building the pane
 	echo "<div id='contactPane'>";
+	echo "<h3>DID Options</h3>";
 
 	// Printing active DID selection form
 	displayActiveDIDChangeForm($userID, $currentContact);
@@ -272,6 +273,7 @@ function displayContactPane($userID, $currentContact) {
 	echo '</form>';
 
 	// Get all of the user's contacts
+	echo "<h3>Contacts</h3>";
 	displayContactPaneContacts($userID); 
 
 	// Finish building the pane

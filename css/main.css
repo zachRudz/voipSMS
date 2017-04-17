@@ -1,12 +1,39 @@
+/****************************************************************
+	-- Table of contents --
+
+	Broad range
+		Everything
+		Header
+		General Pages
+		Forms	
+	
+	Individual pages
+		Index
+		Contacts Table
+		Conversations
+
+	-- Colors --
+	Body Background: #dbdbdb (light grey)
+	warning: #ffea4c;
+	error: #ff3535;
+	messsage: #42c5f4;
+
+****************************************************************/
+
+
 /**************************************************
 	Everything 
 
-	Manually setting the padding/margin because not all browsers act the same way by default
+	Manually setting the padding/margin because not all browsers act the same way by default.
+	Webdev is marvelous
 */
 * {
 	padding: 0px;
 	margin: 0px;
+	font-family: "Arial", sans-serif;
 }
+
+
 
 /**************************************************
 	Header
@@ -15,6 +42,22 @@
 */
 #banner {
 	border-bottom: 2px solid black;
+	padding: 0% 1% 0.3%;
+}
+
+#bannerLogo {
+	color: black;
+
+	font-family: "Courier";
+}
+
+#logo_voip {
+	font-size: 2em;
+	font-weight: bold;
+}
+
+#logo_sms {
+	font-size: 1.5em;
 }
 
 /**************************************************
@@ -22,15 +65,83 @@
 
 	These are elements that will appear in most pages.
 */
+body {
+	background-color: #dbdbdb;
+}
+
+/* Warnings, errors, and messages */
+div.warning,div.error,div.message,div.information{
+	padding: 1% 2%;
+	margin: 1%;
+	
+	border: 1px dashed black;
+	border-radius: 5px;
+}
+
 div.warning {
-	border: 1% solid yellow;	
-	background-color: yellow;
+	background-color: #ffea4c;
 }
 
 div.error {
-	border: 1% solid red;	
-	background-color: red;
+	background-color: #ff3535;
 }
+
+div.message {
+	background-color: #42c5f4;
+}
+
+
+
+/**************************************************
+	Forms	
+
+	Based stack overflow: http://stackoverflow.com/questions/13204002/align-form-elements-in-css
+*/
+div.formWrapper{
+	width: 96%;
+	margin: 1%;
+	padding: 1%;
+	background-color: #98ff59;
+	
+	border: 1px dashed black;
+	border-radius: 5px;
+}
+
+div.formWrapper>form>* {
+	display: inline-block;
+}
+
+label {
+	width: 20%;
+	text-align: right;
+}
+
+label + input, label + select, label + textarea {
+	margin: 0 60% 0 1%;
+}
+
+/* Submit buttons in the form */
+div.formWrapper>form>input[type='submit'] {
+	display: block;
+}
+
+/**************************************************
+	Index
+*/
+div.information {
+	background-color: #a8ffbf;
+}
+
+div.information > p {
+	margin-bottom: 1%;
+}
+
+div.information > ul {
+	margin-left: 2%;
+	margin-bottom: 1%;
+}
+
+
 
 /**************************************************
 	Contacts table
@@ -43,31 +154,79 @@ table#contacts {
 
 
 /**************************************************
+	Contacts Pane
+
+	This is the lil pane that shows up on sms.php to allow the user to...
+		- Change their active DID
+		- Message a new number (sms.php?target=___)
+		- Search for a contact
+*/
+#contactPane {
+	margin: 1%;
+	padding: 1%;
+	
+	border: 1px dashed black;
+	border-radius: 5px;
+	background-color: #98ff59;
+}
+
+#contactPane {
+	margin: 1%;
+	padding: 1%;
+	
+	border: 1px dashed black;
+	border-radius: 5px;
+	background-color: #98ff59;
+}
+
+#didSelection>form>select {
+	display: inline-block;
+	width: 20%;
+	margin-right: 0.3%;
+}
+
+#contactPane>form>input:first-of-type {
+	display: inline-block;
+	width: 20%;
+	margin-right: 0.3%;
+}
+
+#contactPane>h3~h3 {
+	padding-top: 1%;
+}
+
+
+/**************************************************
 	Conversations
 
 	This is the actual SMS conversation, and bulk SMS conversation related
 */
 /* -- Messages -- */
-div.message {
+div#conversation {
+	width: 98%;
+	margin: 1%;
+}
+
+div.sms {
 	width: 80%;
 }
 
-div.message.recieved {
+div.sms.recieved {
 	float: left;
 }
 
-div.message.sent {
+div.sms.sent {
 	float: right;
 }
 
-div.messagePayload {
+div.smsPayload {
 	border: 1px solid black;	
 }
 
-div.message.recieved > .messagePayload {
+div.sms.recieved > .smsPayload {
 	background-color: #77f442;	
 }
 
-div.message.sent > .messagePayload {
+div.sms.sent > .smsPayload {
 	background-color: #41c3f2;	
 }

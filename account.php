@@ -31,13 +31,13 @@ function displayAccountForm($userID) {
 	}
 	
 	// Begin printing the form
-	echo "<div id='userEditForm'>";
+	echo "<div class='formWrapper'>";
 	echo "	<h3>Edit Account Information</h3>";
-	echo "	<div class='message'>";
+	echo "	<p>";
 	echo "	Empty fields will be left unchanged. <br />";
 	echo "	If you want to change your voipSMS password, 
 		make sure you enter your current voipSMS password.";
-	echo "</div>";
+	echo "</p>";
 
 	echo "  <form action='account.php' method='POST'>";
 	echo "      <input name='userID' type='hidden' value='{$userID}' />";
@@ -59,10 +59,13 @@ function displayAccountForm($userID) {
 
 	echo "      <input type='submit' name='submit' value='Save' />";
 	echo "  </form>";
+	echo "</div>";
+
 
 	// Begin printing syncDIDs form
+	echo "<div class='formWrapper'>";
 	echo "  <form action='account.php' method='POST'>";
-	echo "		<label>Sync DIDs with VoIP.MS</label>";
+	echo "		<h3>Sync DIDs with VoIP.MS</h3>";
 	echo "		<input type='submit' name='submit' value='Sync DIDs' />";
 	echo "	</form";
 	echo "</div>";

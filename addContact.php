@@ -6,6 +6,8 @@ require_once('sql/dbQueries.php');
 	Print add contact form
 */
 function printAddContactForm() {
+	echo "<div class='formWrapper'>";
+	echo "<h3>Add a contact</h3>";
 	echo '<form action="addContact.php" method="POST">';
 		echo '<label>First name</label>';
 		echo '<input name="firstName" />';
@@ -22,6 +24,7 @@ function printAddContactForm() {
 
 		echo '<input type="submit">';
 	echo '</form>';
+	echo "</div>";
 }
 
 /**************************************************
@@ -73,7 +76,8 @@ function createContact() {
 		$_POST['did'], 
 		$notes);
 
-	echo "Added contact successfully. <a href='contactList.php'>Back to contact list</a>";
+	echo "<div class='message'>Added contact successfully.";
+	echo "<a href='contactList.php'>Back to contact list</a></div>";
 	printAddContactForm();                                         
 }
 ?>

@@ -45,7 +45,7 @@ function displayConversationSearchForm() {
 	// Getting the list of the user's DIDs
 	$dids = getDIDs($_SESSION['auth_info']['userID']);
 
-	echo '<div id="conversationFilter">';
+	echo '<div class="formWrapper">';
 	echo '	<h3>Search for a Conversation</h3>';
 	echo '	<form action="sms.php" method="post">';
 	echo '		<label>From </label>';
@@ -191,17 +191,11 @@ function searchForConversation($from, $to, $did, $contact, $limit) {
 			$return['messages'][$did] = array();	
 		}
 
-		// Testing if the array index exists for this contact
-		//if(!isset($return['messages'][$did][$contact])) {
-		//	$return['messages'][$did][$contact] = array();	
-		//}
-
 		// Set the most recent SMS for that conversation 
 		$return['messages'][$did][$contact] = $sms;
 	}
 
 	// -- Return --
-	//print_r($return);
 	return $return;
 }
 
@@ -213,8 +207,12 @@ function searchForConversation($from, $to, $did, $contact, $limit) {
 */
 function displayConversations($smsSearchResults) {
 	// Make sure that nothing borked before doing anything
-	if($smsSearchResults['status'] != "success") {
-		echo "Error: Cannot print conversation history (Search failed)";
+	if($smsSearchResults['status'] === "no_sms") {
+		echo "<div class='message'>No messages found with those filter parameters. 
+			Consider widening the filter? ({$smsSearchResults['status']})</div>";
+		return;
+	} else if($smsSearchResults['status'] != "success") {
+		echo "<div class='error'>Error: Cannot print conversation history (Search failed)</div>";
 		return;
 	} 
 

@@ -20,7 +20,7 @@ function displayUsers() {
 	echo "<form action='admin.php' method='post'>";
 
 	// Building the table of users
-	echo "<table id='admin_userList'>";
+	echo "<table id='admin_userList' class='display'>";
 	echo "	<thead>";
 	echo "		<tr>";
 	echo "			<th>Delete</th>";

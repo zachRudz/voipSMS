@@ -22,6 +22,7 @@ function printRegistrationForm() {
 		</ol>
 	</div>';
 
+	echo '<div class="formWrapper">';
 	echo ' <form action="register.php" method="POST">';
 	echo '<h3>voipSMS Account Information</h3>';
 	echo '<label>Name </label>';
@@ -42,6 +43,7 @@ function printRegistrationForm() {
 
 	echo '<input type="submit">';
 	echo '</form> ';
+	echo "</div>";
 }
 
 /**************************************************

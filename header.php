@@ -1,6 +1,8 @@
 <div id="banner">
 	<div id="bannerLogo">
-		<a href="index.php">VoIP SMS</a>
+		<a href="index.php">
+			<span id='logo_voip'>VoIP</span><span id='logo_sms'>SMS</span>
+		</a>
 	</div>
 
 	<?php
@@ -10,11 +12,11 @@
 		// User is logged in
 		echo '<span id="bannerGreeting">Hello, '; 
 		echo htmlspecialchars($_SESSION['auth_info']['name'], ENT_QUOTES);
-		echo '</span>';
+		echo '</span> ';
 		
 		echo '(<a href="account.php">My Account</a>, ';
 		echo '<a href="logout.php">Logout</a>)';
-		echo '<a href="sms.php">SMS Portal</a>';
+		echo ' <a href="sms.php">SMS Portal</a>';
 	} else {
 		// User is not logged in
 		echo '<form action="login.php" method="POST">

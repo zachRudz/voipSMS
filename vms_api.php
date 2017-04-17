@@ -188,7 +188,7 @@ function syncUserDIDs($userID) {
 		
 		// Looping through all the DIDs we just found
 		foreach($dids['dids'] as $d) {
-			echo "Added user DID [{$d['did']}]<br />";
+			//echo "Added user DID [{$d['did']}]<br />";
 			$insert_stmt->bindValue("did", $d['did']);
 			$insert_stmt->execute();
 		}
