@@ -107,9 +107,13 @@ div.formWrapper{
 	border-radius: 5px;
 }
 
-.formWrapper>form>h3 {
+.formWrapper>form>h3,.formWrapper>form>h4,.formWrapper>form>p {
 	display: block;
 	width: 100%;
+}
+
+.formWrapper>form>h4 {
+	margin-top: 1%;
 }
 
 div.formWrapper>form>* {

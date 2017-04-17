@@ -32,20 +32,19 @@ function displayAccountForm($userID) {
 	
 	// Begin printing the form
 	echo "<div class='formWrapper'>";
-	echo "	<h3>Edit Account Information</h3>";
-	echo "	<p>";
-	echo "	Empty fields will be left unchanged. <br />";
-	echo "	If you want to change your voipSMS password, 
-		make sure you enter your current voipSMS password.";
-	echo "</p>";
+	echo "  <form action='account.php' method='POST'";
+	echo " name='accountChange' onsubmit='return validateAccountChange()'>";
+	echo "		<h3>Edit Account Information</h3>";
+	echo "		<p>Empty fields will be left unchanged. </p>";
 
-	echo "  <form action='account.php' method='POST'>";
+	echo "		<h4>User Information</h4>";
 	echo "      <input name='userID' type='hidden' value='{$userID}' />";
 	
 	echo "      <label>Name</label>";
 	echo "      <input name='name' value='{$user['name']}' />";
 	
-	echo '		<label>Password </label>';                        
+	echo "		<h4>Change password</h4>";
+	echo '		<label>New Password </label>';                        
 	echo '		<input type="password" name="password" />';       
 
 	echo '		<label>Confirm password </label>';                
@@ -54,6 +53,7 @@ function displayAccountForm($userID) {
 	echo '		<label>Current password </label>';                
 	echo '		<input type="password" name="currentPassword" />';      
 	
+	echo "		<h4>Change VoIP.ms API Password</h4>";
 	echo '		<label>voip.ms API Password </label>';            
 	echo '		<input type="password" name="vms_apiPassword" />';
 
@@ -122,7 +122,14 @@ function processAccountChanges() {
 		if(trim($_POST['password']) == "") {
 			if(trim($_POST['password']) != trim($_POST['password'])) {
 				echo "<div id='error'>Error: Passwords don't match!</div>";
+				return;
 			}
+		}
+
+		// Make sure that the password meets the length requirement
+		if(strlen($_POST['password']) < 8 && $_POST['password'] != "") {
+				echo "<div id='error'>Error: New password doesn't meet length requirements!</div>";
+				return;
 		}
 
 		// Make the dank changes
@@ -133,6 +140,7 @@ function processAccountChanges() {
 			$currentPassword);
 	} else {
 		echo "<div id='error'>Error: Form not filled out properly. </div>";
+		return;
 	}
 }
 ?>
@@ -141,10 +149,84 @@ function processAccountChanges() {
 <head>
 	<link rel="stylesheet" type="text/css" href="css/main.css" />
 	<title>voipSMS</title>
+	<script>
+	// Make sure form is filled completely and such.
+	function validateAccountChange() {
+		var errors = [];
+		var form = document.forms['accountChange'];
+		var errorMessage = document.getElementById('formErrorMessage');
+		
+		// Clear error classes from inputs
+		form['name'].classList.remove("formError");
+		form['password'].classList.remove("formError");
+		form['password2'].classList.remove("formError");
+		form['currentPassword'].classList.remove("formError");
+		errorMessage.classList.remove('error');
+		
+		// Clear the error div
+		errorMessage.innerHTML = "";
+		
+		// -- Begin processing form --
+		// User filled out passwords, but the new passwords don't match
+		if(form['password'].value != form['password2'].value) {
+			errors.push("You're attempting to change your password, but they don't match.");
+			form['password'].classList.add('formError');
+			form['password2'].classList.add('formError');
+		}
+
+		// Password is too short
+		if(form['password'].value.length < 7 && form['password'].value != "") {
+			errors.push("Your new password is too short (Min 8 characters)");
+			form['password'].classList.add('formError');
+		}
+
+		// Making sure that the user fills out their current password if they wanna change it.
+		if(form['currentPassword'].value != "") {
+			// User filled out current password, but not the new ones
+			if(form['password'].value == "") {
+				errors.push("You're attempting to change your password," +
+					"but you didn't fill out the new password.");
+				form['password'].classList.add('formError');
+			}
+
+			if(form['password2'].value == "") {
+				errors.push("You're attempting to change your password," +
+					"but you didn't fill out the confirmation password.");
+				form['password2'].classList.add('formError');
+			}
+
+		} else {
+			// User didn't fill out their current password, but they want to change it
+			if(form['password'].value != "") {
+				errors.push("Enter your current password too, if you want to change it.");
+				form['currentPassword'].classList.add('formError');
+			}
+		}
+		
+		
+		// -- Writing errors --
+		var numErrors = errors.length;
+		if(numErrors > 0) {
+			// Loop though errors and write them to the error message div
+			errorMessage.innerHTML = "Errors found while processing the form:";
+			
+			for(var i = 0; i < numErrors; i++) {
+				errorMessage.innerHTML += "<br />";
+				errorMessage.innerHTML += errors[i];
+			}
+			
+			errorMessage.classList.add('error');
+			return false;
+		}
+		
+		return true; 
+	}
+	</script>
 </head>
 <body>
 <?php 
 	include_once("header.php");
+	echo "<div id='formErrorMessage'></div>";
 
 	// Make sure we're logged in
 	if(!isset($_SESSION['auth'])) {
