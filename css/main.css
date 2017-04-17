@@ -107,6 +107,11 @@ div.formWrapper{
 	border-radius: 5px;
 }
 
+.formWrapper>form>h3 {
+	display: block;
+	width: 100%;
+}
+
 div.formWrapper>form>* {
 	display: inline-block;
 }
@@ -123,6 +128,13 @@ label + input, label + select, label + textarea {
 /* Submit buttons in the form */
 div.formWrapper>form>input[type='submit'] {
 	display: block;
+}
+
+div#formErrorMessage {
+}
+
+.formError {
+	border: 1px solid red;
 }
 
 /**************************************************

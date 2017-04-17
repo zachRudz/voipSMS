@@ -23,7 +23,8 @@ function printRegistrationForm() {
 	</div>';
 
 	echo '<div class="formWrapper">';
-	echo ' <form action="register.php" method="POST">';
+	echo ' <form name="register" action="register.php" method="POST"';
+	echo '	onsubmit="return validateRegister()">';
 	echo '<h3>voipSMS Account Information</h3>';
 	echo '<label>Name </label>';
 	echo '<input name="name" />';
@@ -173,10 +174,104 @@ function createUser() {
 <head>
 <link rel="stylesheet" type="text/css" href="css/main.css" />
 <title>voipSMS: Register</title>
+
+<script>
+// Source: http://www.w3resource.com/javascript/form/email-validation.php
+function validateEmail(mail) {  
+	if (/^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/.test(mail))  
+		return (true)  
+
+	return (false)  
+}  
+
+// Make sure form is filled completely and such.
+function validateRegister() {
+	var errors = [];
+	var form = document.forms['register'];
+	var errorMessage = document.getElementById('formErrorMessage');
+
+	// Clear error classes from inputs
+	form['name'].classList.remove("formError");
+	form['password'].classList.remove("formError");
+	form['password2'].classList.remove("formError");
+	form['vms_email'].classList.remove("formError");
+	form['vms_apiPassword'].classList.remove("formError");
+	errorMessage.classList.remove('error');
+
+	// Clear the error div
+	errorMessage.innerHTML = "";
+
+	// -- Begin processing form --
+	// Making sure values aren't empty
+	if(form['name'].value == "") {
+		errors.push("Name cannot be empty.");
+		form['name'].classList.add('formError');
+	}
+
+	if(form['password'].value == "") {
+		errors.push("Password cannot be empty.");
+		form['password'].classList.add('formError');
+	}
+
+	if(form['vms_email'].value == "") {
+		errors.push("VoIP.ms email cannot be empty.");
+		form['vms_email'].classList.add('formError');
+	}
+
+	if(form['vms_apiPassword'].value == "") {
+		errors.push("VoIP.ms API password cannot be empty.");
+		form['vms_apiPassword'].classList.add('formError');
+	}
+
+	// Making sure passwords match
+	if(form['password'].value != form['password2'].value) {
+		errors.push("Passwords don't match.");
+		form['password'].classList.add('formError');
+		form['password2'].classList.add('formError');
+	}
+
+	// Making sure values are long enough
+	if(form['password'].value.length < 8) {
+		errors.push("Password isn't long enough (Min 8 characters).");
+		form['password'].classList.add('formError');
+	}
+
+	if(form['name'].value.length < 2) {
+		errors.push("Name isn't long enough (Min 2 characters).");
+		form['name'].classList.add('formError');
+	}
+
+	// Making sure vms Email is valid
+	if(!validateEmail(form['vms_email'].value)) {
+		errors.push("VoIP.ms email isn't valid.");
+		form['vms_email'].classList.add('formError');
+	}
+
+
+	// -- Writing errors --
+	var numErrors = errors.length;
+	if(numErrors > 0) {
+		// Loop though errors and write them to the error message div
+		errorMessage.innerHTML = "Errors found while processing the form:";
+
+		for(var i = 0; i < numErrors; i++) {
+			errorMessage.innerHTML += "<br />";
+			errorMessage.innerHTML += errors[i];
+		}
+
+		errorMessage.classList.add('error');
+		return false;
+	}
+	
+	return true;
+}
+</script>
+
 </head>
 <body>
 <?php 
 	require_once('header.php');
+	echo "<div id='formErrorMessage'></div>";
 
 	// If the form was submitted, attempt to create a user.
 	// Otherwise, print the registration form 
@@ -185,7 +280,7 @@ function createUser() {
 	} else {
 		// Make sure that the user's not already logged in.
 		if(isset($_SESSION['auth'])) {
-			echo "<div id='error'>" .
+			echo "<div class='error'>" .
 				"Error: You can't register a user while you're logged in.</div>";
 		}  else {
 			printRegistrationForm();
