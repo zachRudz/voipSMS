@@ -8,13 +8,14 @@ require_once("smsConversation.php");
 <!DOCTYPE html>
 <html>
 <head>
-	<meta charset="ISO-8859-1">
+	<meta charset="utf-8" />
 	<link rel="stylesheet" type="text/css" href="css/main.css" />
 	<title>voipSMS: SMS Center</title>
 
 	<script src="//code.jquery.com/jquery-1.12.0.min.js"></script>
 	<script src="//cdn.datatables.net/1.10.13/js/jquery.dataTables.min.js"></script>
 	<link rel="stylesheet" type="text/css" href="//cdn.datatables.net/1.10.13/css/jquery.dataTables.min.css" />
+
 	<script>
 		// JQuery DataTable stuff for the contact pane
 		$(document).ready(function(){
@@ -22,6 +23,7 @@ require_once("smsConversation.php");
 				"pageLength": 25
 			});
 		});
+
 		/**************************************************
 		 Spicey scriptaroonie to jump to the bottom of the webpage when the page loads
 
@@ -32,6 +34,8 @@ require_once("smsConversation.php");
 			window.scrollTo(0,document.body.scrollHeight);
 		}
 	</script>
+
+	<script src="js/smsValidation.js"></script>
 </head>
 <body onload="scrollToBottom()">
 <?php 

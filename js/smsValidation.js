@@ -77,6 +77,9 @@ function validateConversationSearch() {
 	
 	// Clear error classes from inputs
 	errorMessage.classList.remove('error');
+	form['limit'].classList.remove("formError");
+	form['from'].classList.remove("formError");
+	form['to'].classList.remove("formError");
 	
 	// Clear the error div
 	errorMessage.innerHTML = "";
@@ -103,6 +106,77 @@ function validateConversationSearch() {
 		}
 	}
 
+	// -- Writing errors --
+	var numErrors = errors.length;
+	if(numErrors > 0) {
+		// Loop though errors and write them to the error message div
+		errorMessage.innerHTML = "Errors found while searching for a conversation:";
+		
+		for(var i = 0; i < numErrors; i++) {
+			errorMessage.innerHTML += "<br />";
+			errorMessage.innerHTML += errors[i];
+		}
+		
+		errorMessage.classList.add('error');
+		return false;
+	}
+	
+	return true;
+}
+
+/**************************************************
+	Validate Conversation Filter 
+
+	Make sure that when the user filters through a conversation...
+		- $limit is positive
+		- To/from dates are valid format (if entered at all)
+			- This means "yyyy-mm-dd"
+	
+	Aww jeez Rick, lookit all this redundant code, sh-shouldn't we refactor?
+	There's no time to refactor, Morty! We've gotta- we've gotta submit before midnight Morty!
+*/
+function validateConversationFilter() {
+    var errors = [];
+	var form = document.forms['conversationFilter'];
+	var errorMessage = document.getElementById('formErrorMessage_conversationFilter');
+	
+	// Clear error classes from inputs
+	errorMessage.classList.remove('error');
+	form['limit'].classList.remove("formError");
+	form['from'].classList.remove("formError");
+	form['to'].classList.remove("formError");
+	
+	// Clear the error div
+	errorMessage.innerHTML = "";
+	
+	// -- Begin processing form --
+	// Making sure the limit is valid
+	if(form['limit'].value < 1) {
+		errors.push("Limit must be positive.");
+		form['limit'].classList.add("formError");
+	}
+
+	// Making sure the to/from dates are valid
+	if(form['from'].value != "") {
+		if(!validateDate(form['from'].value)) {
+			errors.push("From date must be in format 'yyyy-mm-dd'.");
+			form['from'].classList.add("formError");
+		}
+	}
+	
+	if(form['to'].value != "") {
+		if(!validateDate(form['to'].value)) {
+			errors.push("To date must be in format 'yyyy-mm-dd'.");
+			form['to'].classList.add("formError");
+		}
+	}
+
+	// Making sure contact DID is valid
+	if(!validateDID(form['target'].value)) {
+			errors.push("Contact phone number is not in the right format. Example format: '1231231234'");
+			form['target'].classList.add("formError");
+	}
+	
 	// -- Writing errors --
 	var numErrors = errors.length;
 	if(numErrors > 0) {

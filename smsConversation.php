@@ -28,8 +28,9 @@ require_once("sql/dbQueries.php");
 */
 function displaySMSConversationSearchForm($target) {
 	echo '<div class="formWrapper">';
-	echo '  <h3>Filter this conversation conversation</h3>';
-	echo '  <form action="sms.php" method="get">';
+	echo '  <h3>Filter this conversation</h3>';
+	echo '  <form action="sms.php" method="get" ';
+	echo '	name="conversationFilter" onsubmit="return validateConversationFilter()">';
 	echo '      <label>From </label>';
 	echo '      <input type="date" name="from" />';
 	
@@ -45,6 +46,7 @@ function displaySMSConversationSearchForm($target) {
 	echo '      <input type="submit" name="submit" value="filter" />';
 	echo '  </form>';
 	echo '</div>';
+	echo '<div id="formErrorMessage_conversationFilter"></div>';
 }
 
 /**************************************************
@@ -258,9 +260,6 @@ function displayContactPaneContacts($userID) {
 	and links to sms.php?target=$contact.
 */
 function displayContactPane($userID, $currentContact) {
-	// Writing js for validation
-	echo '<script src="js/smsValidation.js"></script>';
-
 	// Begin building the pane
 	echo "<div id='contactPane'>";
 	echo "<h3>DID Options</h3>";
