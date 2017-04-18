@@ -78,19 +78,23 @@ div.warning,div.error,div.message,div.information{
 	border-radius: 5px;
 }
 
-div.warning {
+.warning {
 	background-color: #ffea4c;
 }
 
-div.error {
+.error {
 	background-color: #ff3535;
 }
 
-div.message {
+.message {
 	background-color: #42c5f4;
 }
 
-
+span.warning,span.error,span.message,span.information{
+	margin-left: 1%;
+	border: 1px dashed black;
+	border-radius: 5px;
+}
 
 /**************************************************
 	Forms	
@@ -135,6 +139,7 @@ div.formWrapper>form>input[type='submit'] {
 }
 
 div#formErrorMessage {
+
 }
 
 .formError {

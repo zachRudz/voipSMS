@@ -26,6 +26,7 @@
 <script src="//cdn.datatables.net/1.10.13/js/jquery.dataTables.min.js"></script>
 <link rel="stylesheet" type="text/css" href="//cdn.datatables.net/1.10.13/css/jquery.dataTables.min.css" />
 
+<script src="js/smsValidation.js"></script>
 <?php
 require_once('sql/dbinfo.php');
 require_once('sql/dbQueries.php');
@@ -47,7 +48,8 @@ function displayConversationSearchForm() {
 
 	echo '<div class="formWrapper">';
 	echo '	<h3>Search for a Conversation</h3>';
-	echo '	<form action="sms.php" method="post">';
+	echo '	<form action="sms.php" method="post" ';
+	echo '	name="conversationSearch" onsubmit="return validateConversationSearch()">';
 	echo '		<label>From </label>';
 	echo '		<input type="date" name="from" />';
 
@@ -79,6 +81,7 @@ function displayConversationSearchForm() {
 	echo '		<input type="submit" name="submit" value="search" />';
 	echo '	</form>';
 	echo '</div>';
+	echo '<div id="formErrorMessage_conversationSearch"></div>';
 }
 
 /**************************************************

@@ -8,6 +8,7 @@ require_once("smsConversation.php");
 <!DOCTYPE html>
 <html>
 <head>
+	<meta charset="ISO-8859-1">
 	<link rel="stylesheet" type="text/css" href="css/main.css" />
 	<title>voipSMS: SMS Center</title>
 

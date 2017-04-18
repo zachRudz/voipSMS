@@ -77,7 +77,7 @@ function listContacts() {
 ?>
 <!DOCTYPE html>
 <html>
-<head>
+    <meta charset="ISO-8859-1">
 	<title>voipSMS: Contact List</title>
 	<link rel="stylesheet" type="text/css" href="css/main.css" />
 

@@ -9,12 +9,13 @@ function printLoginPage($message) {
 	echo ' <!DOCTYPE html>
 		<html> 
 		<head> 
+		    <meta charset="ISO-8859-1">
 			<link rel="stylesheet" type="text/css" href="css/main.css" /> 
 			<title>voipSMS: Login failed</title> 
 		</head> 
 		<body>';
 		require_once('header.php'); 
-	echo $message;
+	echo "<div class='error'>{$message}</div>";
 	echo '</body> 
 		</html>';
 }

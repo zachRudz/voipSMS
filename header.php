@@ -30,7 +30,6 @@
 
 			<input type="submit">
 		</form>
-		
 		<a href="register.php">Register</a>';
 	}
 	?>

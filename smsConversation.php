@@ -258,6 +258,9 @@ function displayContactPaneContacts($userID) {
 	and links to sms.php?target=$contact.
 */
 function displayContactPane($userID, $currentContact) {
+	// Writing js for validation
+	echo '<script src="js/smsValidation.js"></script>';
+
 	// Begin building the pane
 	echo "<div id='contactPane'>";
 	echo "<h3>DID Options</h3>";
@@ -267,9 +270,11 @@ function displayContactPane($userID, $currentContact) {
 
 	// Print form to let the user text a new DID
 	// This would be something that they would input via an HTML form
-	echo '<form action="sms.php" method="get">';
+	echo '<form action="sms.php" method="get"';
+	echo ' name="newSMS" onsubmit="return validateNewSMS()">';
 		echo '<input type="text" name="target">';
 		echo '<input type="submit" value="Text new number"/>';
+		echo '<span id="formErrorMessage_newSMS"></span>';
 	echo '</form>';
 
 	// Get all of the user's contacts
