@@ -127,6 +127,28 @@ function getSMS($userID, $from, $to, $did, $contact, $limit) {
 	return makeRestCall($parameters);
 }
 
+// Only gets messages sent to/from a user's $did, as opposed to all of them
+function vms_sendSMS($userID, $activeDID, $target, $message) {
+	// Getting the user from the DB
+	$userData = getUserAPICredentials($userID);
+	if(count($userData) != 1) {
+		// No user with that ID found; Return an array of status="userID_not_found""
+		return array("status"=>"userID_not_found");
+	}
+
+	// If we've found the user, make the rest call using the found parameters
+	// Un-Obfuscating the api password in the db
+	$api_password = base64_decode($userData[0]["vms_apiPassword"]);
+
+	$parameters = array("api_username"=>$userData[0]["vms_email"],
+		"api_password"=>$api_password,
+		"method"=>"sendSMS",
+		"did"=>$activeDID,
+		"dst"=>$target,
+		"message"=>$message);
+
+	return makeRestCall($parameters);
+}
 /**************************************************
 	DIDs
 

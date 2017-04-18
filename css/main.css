@@ -226,6 +226,10 @@ table#contacts {
 div#conversation {
 	width: 98%;
 	margin: 1%;
+
+	/* This fixes an issue with messages overflowing over the sendSMS div */
+	overflow-y: hidden; 
+	display: block;
 }
 
 div.sms {
@@ -242,6 +246,7 @@ div.sms.sent {
 
 div.smsPayload {
 	border: 1px solid black;	
+	padding: 0.3%;
 }
 
 div.sms.recieved > .smsPayload {
@@ -250,4 +255,12 @@ div.sms.recieved > .smsPayload {
 
 div.sms.sent > .smsPayload {
 	background-color: #41c3f2;	
+}
+
+div#sendSMS {
+
+}
+
+textarea#sendSMS {
+	width: 100%;
 }

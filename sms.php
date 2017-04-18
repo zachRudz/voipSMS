@@ -98,14 +98,45 @@ require_once("smsConversation.php");
 				if(isset($_REQUEST['limit']))
 					$limit = $_REQUEST['limit'];	
 
+				// Testing if we've sent an SMS.
+				//	Do the bad thing if so
+				if($_SERVER['REQUEST_METHOD'] == "POST") {
+					if(isset($_POST['message'])) {
+						// Pushing the payload
+						$sendSMSResult = sendSMS($_SESSION['auth_info']['userID'],
+							$_POST['target'],
+							$_POST['message']);
+
+						if($sendSMSResult['status'] != "success") {
+							// SMS Sending failed 
+							// Let the user know why
+							echo "<div class='error'>";
+							echo "Error: Sending of SMS message failed (Status: {$sendSMSResult['status']}) ";
+							// If something went wrong on the vms side, this won't be set.
+							// However, if local server-side validation failed, we will have 
+							//	errors to go through.
+							if(isset($sendSMSResult['errors'])) {
+								echo 'Reasons: <ul>';
+								foreach($sendSMSResult['errors'] as $errors) {
+									echo "<li>{$errors}</li>";
+								}
+								echo '</ul>';
+							}
+
+							echo "</div>";
+						}
+					}
+				}
+
+				// Display the conversation filter
+				displaySMSConversationSearchForm($_REQUEST['target']);
+
 				$convo = getConversation($_SESSION['auth_info']['userID'],
 					$from, $to,
 					$_SESSION['auth_info']['activeDID'],
 					$_REQUEST['target'],
 					$limit);
 
-				// Display the conversation filter
-				displaySMSConversationSearchForm($_REQUEST['target']);
 
 				//echo "to: [{$to}] <br />";
 				//echo "from: [{$from}]<br />";
@@ -119,6 +150,9 @@ require_once("smsConversation.php");
 
 				// Print the conversation
 				displayConversationHistory($convo);
+
+				// Print the form to send SMS
+				displaySendSMSForm($_REQUEST['target']);
 
 			} // Make sure $target != ""
 		} else {

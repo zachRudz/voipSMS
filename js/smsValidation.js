@@ -195,3 +195,53 @@ function validateConversationFilter() {
 	return true;
 }
 
+
+/**************************************************
+	Validate Send SMS
+
+	Make sure that when the user sends an SMS...
+		- The message is between 0-160 characters.
+		- The $form['target'] is a valid DID
+			- IE: The user didn't heck up my dang form
+*/
+function validateSendSMS() {
+    var errors = [];
+	var form = document.forms['sendSMS'];
+	var errorMessage = document.getElementById('formErrorMessage_sendSMS');
+	
+	// Clear error classes from inputs
+	errorMessage.classList.remove('error');
+	form['message'].classList.remove("formError");
+	
+	// Clear the error div
+	errorMessage.innerHTML = "";
+	
+	// -- Begin processing form --
+	// Making sure the limit is valid
+	if(form['message'].value < 1 || form['message'].value > 160) {
+		errors.push("Message must be between 0-160 characters.");
+		form['message'].classList.add("formError");
+	}
+
+	// Making sure contact DID is valid
+	if(!validateDID(form['target'].value)) {
+			errors.push("Contact phone number is not in the right format. Example format: '1231231234'");
+	}
+
+	// -- Writing errors --
+	var numErrors = errors.length;
+	if(numErrors > 0) {
+		// Loop though errors and write them to the error message div
+		errorMessage.innerHTML = "Errors found while sending your SMS:";
+		
+		for(var i = 0; i < numErrors; i++) {
+			errorMessage.innerHTML += "<br />";
+			errorMessage.innerHTML += errors[i];
+		}
+		
+		errorMessage.classList.add('error');
+		return false;
+	}
+	
+	return true;
+}

@@ -51,10 +51,10 @@ function displayConversationSearchForm() {
 	echo '	<form action="sms.php" method="post" ';
 	echo '	name="conversationSearch" onsubmit="return validateConversationSearch()">';
 	echo '		<label>From </label>';
-	echo '		<input type="date" name="from" />';
+	echo '		<input type="date" name="from" placeholder="yyyy-mm-dd" />';
 
 	echo '		<label>To</label>';
-	echo '		<input type="date" name="to" />';
+	echo '		<input type="date" name="to" placeholder="yyyy-mm-dd" />';
 
 	// Printing all of the user's dids
 	echo '		<label>Your number</label>';
@@ -73,7 +73,7 @@ function displayConversationSearchForm() {
 	echo '		</select>';
 
 	echo '		<label>Target Contact</label>';
-	echo '		<input type="number" name="contact" />';
+	echo '		<input type="number" name="contact" placeholder="Eg: 1231231234" />';
 
 	echo '		<label>Limit of texts to search</label>';
 	echo '		<input type="number" name="limit" min="0" value="25" />';

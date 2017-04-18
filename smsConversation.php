@@ -1,7 +1,7 @@
-<?php
-require_once("vms_api.php");
+<?php require_once("vms_api.php");
 require_once("sql/dbinfo.php");
-require_once("sql/dbQueries.php");
+require_once("sql/dbQueries.php"); 
+
 /**************************************************
 	-- SMS Conversation --
 	This file contains functions related to a single conversation
@@ -32,13 +32,14 @@ function displaySMSConversationSearchForm($target) {
 	echo '  <form action="sms.php" method="get" ';
 	echo '	name="conversationFilter" onsubmit="return validateConversationFilter()">';
 	echo '      <label>From </label>';
-	echo '      <input type="date" name="from" />';
+	echo '      <input type="date" name="from" placeholder="yyyy-mm-dd" />';
 	
 	echo '      <label>To</label>';
-	echo '      <input type="date" name="to" />';
+	echo '      <input type="date" name="to" placeholder="yyyy-mm-dd" />';
 	
 	echo '      <label>Contact</label>';
-	echo '      <input type="input" name="target" value="' .$target.'" />';
+	echo '      <input type="input" name="target" value="' .$target.'" ' .
+		'placeholder="Eg: 1231231234" />';
 	
 	echo '      <label>Limit of texts to search</label>';
 	echo '      <input type="number" name="limit" min="0" value="25" />';
@@ -271,7 +272,7 @@ function displayContactPane($userID, $currentContact) {
 	// This would be something that they would input via an HTML form
 	echo '<form action="sms.php" method="get"';
 	echo ' name="newSMS" onsubmit="return validateNewSMS()">';
-		echo '<input type="text" name="target">';
+		echo '<input type="text" placeholder="Eg: 1231231234" name="target">';
 		echo '<input type="submit" value="Text new number"/>';
 		echo '<span id="formErrorMessage_newSMS"></span>';
 	echo '</form>';
@@ -282,5 +283,74 @@ function displayContactPane($userID, $currentContact) {
 
 	// Finish building the pane
 	echo "</div>";
+}
+
+
+/**************************************************
+	Display Send SMS Form
+*/
+function displaySendSMSForm($target) {
+	echo '<div div="sendSMS">';
+	echo '<div class="formWrapper">';
+	echo "	<form action='sms.php?target={$target}' method='post' ";
+	echo '		name="sendSMS" onsubmit="return validateSendSMS()">';
+		// Used for js client-side validation
+		echo "<input type='hidden' name='target' value='{$target}' />";
+		echo "<input type='hidden' name='activeDID' value='{$_SESSION['auth_info']['activeDID']}' />";
+
+		echo '<textarea id="sendSMS" name="message" maxlength="160" required ';
+		echo 'placeholder="Send an SMS..."></textarea>';
+		echo "<input type='submit' name='send' value='Send' />";
+		echo "<span id='formErrorMessage_sendSMS'></span>";
+	echo '	</form>';
+	echo '</div>';
+	echo '</div>';
+}
+
+
+/**************************************************
+	Send SMS 
+
+	Do some spicey validation
+	- Is the message the correct size? (0-160 message size)
+	- Is the message sent from a DID that isn't my personal number?
+*/
+function sendSMS($userID, $target, $message) {
+	// -- Validate parameters --
+	$ret = array("errors"=> array(), "status"=> "success");
+
+	// Making sure we're logged in
+	if(!isset($userID)) {
+		$ret['status'] = "failure";
+		$ret['errors'][] = "No user ID given";
+	}
+
+	if(!isset($_SESSION['auth'])) {
+		$ret['status'] = "failure";
+		$ret['errors'][] = "Not logged in.";
+	}
+
+	// Making sure parameters are set
+	if(!isset($target)) {
+		$ret['status'] = "failure";
+		$ret['errors'][] = "No target contact DID given.";
+	}
+	if(!isset($message)) {
+		$ret['status'] = "failure";
+		$ret['errors'][] = "No message given.";
+	}
+
+	// Quitting now if there's any errors
+	if($ret['status'] == "failure") {
+		return $ret;
+	}
+
+	// Making the SMS call
+	$smsSendResult = vms_sendSMS($userID,
+		$_SESSION['auth_info']['activeDID'],
+		$target,
+		$message);
+
+	return $smsSendResult;	
 }
 ?>
