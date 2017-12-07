@@ -77,6 +77,8 @@ function writeLoggedInMessage() {
 	} else {
 		writeLoggedInMessage();
 	}
+
+	Testing git hooks.
 ?>
 </body>
 </html>
