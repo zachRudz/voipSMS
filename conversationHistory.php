@@ -192,10 +192,10 @@ function searchForConversation($from, $to, $did, $contact, $limit) {
 		// Testing if the array index exists for this did 
 		if(!isset($return['messages'][$did])) {
 			$return['messages'][$did] = array();	
-		}
 
-		// Set the most recent SMS for that conversation 
-		$return['messages'][$did][$contact] = $sms;
+			// Set the most recent SMS for that conversation 
+			$return['messages'][$did][$contact] = $sms;
+		}
 	}
 
 	// -- Return --

@@ -1,5 +1,4 @@
-<?php
-session_start();
+<?php session_start();
 require_once("sql/dbQueries.php");
 
 /**************************************************
@@ -77,8 +76,6 @@ function writeLoggedInMessage() {
 	} else {
 		writeLoggedInMessage();
 	}
-
-	Testing git hooks.
 ?>
 </body>
 </html>
