@@ -42,7 +42,7 @@ function displaySMSConversationSearchForm($target) {
 		'placeholder="Eg: 1231231234" />';
 	
 	echo '      <label>Limit of texts to search</label>';
-	echo '      <input type="number" name="limit" min="0" value="25" />';
+	echo '      <input type="number" name="limit" min="0" value="100" />';
 	
 	echo '      <input type="submit" name="submit" value="filter" />';
 	echo '  </form>';
@@ -95,7 +95,7 @@ function getConversation($userID, $from, $to, $did, $contact, $limit) {
 		$from = Date('Y-m-d');
 	}
 	if(trim($limit) == "") {
-		$limit = "25";
+		$limit = "100";
 	}
 
 	// Making the SMS call

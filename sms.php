@@ -85,7 +85,7 @@ require_once("smsConversation.php");
 				// Getting filter results, if any
 				$to = "";
 				$from = "";
-				$limit = "25";
+				$limit = "100";
 
 				// Filter dates
 				if(isset($_REQUEST['to']))
