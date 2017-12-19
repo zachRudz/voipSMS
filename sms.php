@@ -170,13 +170,25 @@ require_once("smsConversation.php");
 
 				// If the user wants to search for a history of conversations
 				if($_POST['submit'] = "search") {
+					// Creating artificial dates if they weren't filled out by the user
+					// Default range: [($current_time - 1 month), $current_time]
+					$from = $_POST['from'];
+					$to = $_POST['to'];
+
+					if(trim($_POST['from']) == "") {
+						$from = Date("Y-m-d", strtotime("-1 months"));
+					}
+					if(trim($_POST['to']) == "") {
+						$to = Date('Y-m-d');
+					}
+
 					// Validate that the post data is all there
-					if(isset($_POST['from'])
-						&& isset($_POST['to'])
+					if(isset($from)
+						&& isset($to)
 						&& isset($_POST['contact'])
 						&& isset($_POST['limit'])) {
-						$smsSearchResults = searchForConversation($_POST['from'],
-							$_POST['to'],
+						$smsSearchResults = searchForConversation($from,
+							$to,
 							$_POST['did'],
 							$_POST['contact'],
 							$_POST['limit']);
@@ -192,10 +204,10 @@ require_once("smsConversation.php");
 								echo "<li>{$errors}</li>";
 							}
 							echo '</ul></div>';
+						} else {
+							// Conversation search succeeded, display results
+							displayConversations($smsSearchResults);
 						}
-
-						// Conversation search succeeded, display results
-						displayConversations($smsSearchResults);
 					} else { 
 						// Conversation form wasn't filled out properly. Complain moar
 						echo '<div class="error">
