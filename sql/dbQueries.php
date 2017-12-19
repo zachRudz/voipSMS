@@ -15,6 +15,7 @@ require_once('dbinfo.php');
 	getUser()
 	getUserFromLogin()
 	alterUser()
+	setDefaultDID()
 
 	-- Contacts --
 	getContact()
@@ -36,9 +37,16 @@ function deleteUserDIDS($ownerID) {
 	// Getting all DIDs for this user
 	try {
 		$db = connectToDB();
+
+		// Nulling out the reference to the owner's default DID
+		$query = "UPDATE users SET didID_default = NULL where userID = :ownerID";
+		$select_stmt = $db->prepare($query);
+		$select_stmt->bindValue(":ownerID", $ownerID);
+		$select_stmt->execute();
 		
 		// Getting all of the contacts for this user
-		$select_stmt = $db->prepare("DELETE FROM `dids` WHERE ownerID = :ownerID");
+		$query = "DELETE FROM `dids` WHERE ownerID = :ownerID";
+		$select_stmt = $db->prepare($query);
 		$select_stmt->bindValue(":ownerID", $ownerID);
 		$select_stmt->execute();
 	} catch(Exception $e) {
@@ -109,8 +117,9 @@ function getUser($userID) {
 	try {
 		$db = connectToDB();
 		
-		// Getting all of the contacts for this user
-		$query = "SELECT * FROM `users` WHERE userID = :userID";
+		// Getting the user's information given their ID
+		$query = "SELECT * FROM `users` LEFT JOIN dids ON didID_default = didID" . 
+			" WHERE userID = :userID";
 
 		$select_stmt = $db->prepare($query);
 		$select_stmt->bindValue(":userID", $userID);
@@ -211,6 +220,50 @@ function alterUser($userID, $name, $vms_apiPassword, $userPassword, $currentPass
 }
 
 /**************************************************
+	Set user's default DID
+
+	Changes the values of an existing user.
+	If a value is null, don't change it.
+*/
+function setDefaultDID($userID, $newDefaultDID) {
+	// Making sure the user exists
+	$user = getUser($userID);
+	if($user == False) {
+		echo "<div class='error'>Cannot change user password (current password incorrect)</div>";
+		return False;
+	}
+
+	// Fetching the new DID from the dids table. Setting it to null if we can't find it.
+	$dids = getDIDs($userID);
+	$didID = null;
+	foreach($dids as $d) {
+		if($d['did'] == $newDefaultDID) {
+			$didID = $d['didID'];
+		}
+	}
+
+	// Begin altering the table entry
+	try {
+		$db = connectToDB();                                                 
+
+		// Begin updating the contact's default DID
+		$query = "UPDATE users SET didID_default = :didID " .
+			"WHERE userID = :userID";
+	
+		// Preparing the query
+		$stmt = $db->prepare($query);
+		$stmt->bindValue(":didID", $didID);     
+		$stmt->bindValue(":userID", $userID);     
+
+		$stmt->execute();
+		return True;
+	} catch(Exception $e) {
+		echo "<div class='error'>Exception caught: " . $e->getMessage() . "</div>";
+		return False;
+	}
+}
+
+/**************************************************
 	Get user from email/password
 
 	Returns the user's ID, email and base64 encoded API password
@@ -221,9 +274,10 @@ function getUserFromLogin($vms_email, $vms_password) {
 		$db = connectToDB();                                                 
 
 		// Validating user login against db                                  
-		$stmt = $db->prepare("SELECT userID, name
-		FROM users WHERE                                                 
-		vms_email=:vms_email AND userPassword=SHA2(:userPassword,256)"); 
+		$stmt = $db->prepare("SELECT userID, name, did as default_did ".
+			"FROM users " .
+			"LEFT JOIN dids ON didID_default = didID " .
+			"WHERE vms_email=:vms_email AND userPassword=SHA2(:userPassword,256)"); 
 		
 		$stmt->bindValue(":vms_email", trim($vms_email));           
 		$stmt->bindValue(":userPassword", trim($vms_password));     

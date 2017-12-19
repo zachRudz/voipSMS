@@ -36,12 +36,18 @@ function loginUser() {
 		$_SESSION['auth_info'] = $userData[0];
 
 		// -- Setting the user's active DID --
-		// Getting the user's DIDs
-		$dids = getDIDs($_SESSION['auth_info']['userID']);
-		if(count($dids) == 0) {
-			$_SESSION['auth_info']['activeDID'] = "No user DID selected.";
+		if($userData[0]['default_did'] == null) {
+			// User hasn't selected a DID yet.
+			// Fetch all the user's DIDs, and try to set the first one as the default.
+			$dids = getDIDs($_SESSION['auth_info']['userID']);
+			if(count($dids) == 0) {
+				$_SESSION['auth_info']['activeDID'] = "No user DID selected.";
+			} else {
+				$_SESSION['auth_info']['activeDID'] = $dids[0]['did'];
+			}
 		} else {
-			$_SESSION['auth_info']['activeDID'] = $dids[0]['did'];
+			// User has selected a DID before.
+			$_SESSION['auth_info']['activeDID'] = $userData[0]['default_did'];
 		}
 
 		// Head back home

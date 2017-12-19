@@ -1,6 +1,7 @@
 <?php
 session_start();
-require_once('sql/dbinfo.php');
+//require_once('sql/dbinfo.php');
+require_once('sql/dbQueries.php');
 require_once('vms_api.php');
 require_once('conversationHistory.php');
 require_once("smsConversation.php");
@@ -51,7 +52,11 @@ require_once("smsConversation.php");
 		//	whatever they were doing.
 		// $_REQUEST['target'] should be set if they were in a conversation.
 		if(isset($_REQUEST['activeDID'])) {
+			// Update the session variable
 			$_SESSION['auth_info']['activeDID'] = htmlspecialchars($_REQUEST['activeDID']);
+
+			// And update the database to reflect that
+			setDefaultDID($_SESSION['auth_info']['userID'], $_SESSION['auth_info']['activeDID']);
 		}
 
 		// Print the conversation pane
