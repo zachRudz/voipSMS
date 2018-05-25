@@ -315,4 +315,5 @@ function validateRegister() {
 	return true;
 }
 </script>
-<?php require_once("pageBottom.php"); ?> 
+<?php require_once("imports/bootstrap.php"); ?> 
+</html>

@@ -75,6 +75,5 @@ function writeLoggedInMessage() {
 	}
 ?>
 </body>
-
-
-<?php require_once("pageBottom.php"); ?>
+<?php require_once("imports/bootstrap.php"); ?>
+</html>
