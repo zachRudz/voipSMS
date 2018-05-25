@@ -9,10 +9,26 @@ session_start();
 function printRegistrationForm() {
 	// Let the user know that they need to enable API access on their
 	//		voip.ms account before registering.
-	echo '<div class="warning">
-		Note: The VoIP.ms API is not enabled by default. You must enable API access
-		on your VoIP.ms account before registering. You can allow the 
-		API Access from within your account, by following these steps:
+	echo '<div class="alert alert-warning">
+		<div>
+			Note: The VoIP.ms API is not setup by default. Prior to registration, you must follow the below
+			steps to ensure that this website can interface with your VoIP.ms account.
+
+			<ol>		
+				<li>Enable API access</li>
+				<li>Whitelist the IP address of this server for API access</li>
+			</ol>
+		</div>
+		</div>';
+		
+
+		echo '
+		<div>Enabling VoIP.ms API Access</div>
+		<div>
+			You must enable API access
+			on your VoIP.ms account before registering. You can allow the 
+			API Access from within your account, by following these steps:
+		</div>
 
 		<ol>		
 			<li>Log-in to your VoIP.ms account</li>
@@ -20,31 +36,46 @@ function printRegistrationForm() {
 		    <li>Click on button [Enable/Disable API] to Enable / Disable 
 				the API Access</li>
 		</ol>
-	</div>';
 
-	echo '<div class="formWrapper">';
-	echo ' <form name="register" action="register.php" method="POST"';
-	echo '	onsubmit="return validateRegister()">';
-	echo '<h3>voipSMS Account Information</h3>';
-	echo '<label>Name </label>';
-	echo '<input name="name" />';
+		<div>Whitelisting the IP of this server</div>
+		In addition, you also have to whitelist the IP Address of this server ('. $_SERVER['SERVER_ADDR'] . ') for API access.
+		Alternatively, you can whitelist all IP Addresses (0.0.0.0).
+		<ol>		
+			<li>Log-in to your VoIP.ms account</li>
+			<li>Go to "Main Menu" -> "SOAP & REST/JSON API"</li>
+		    <li>Enter the IP Address you want to whitelist in the field labeled "Enable IP Address".</li>
+		    <li>Click "Save IP Addresses" to save the changes.</li>
+		</ol>
+	';
 
-	echo '<label>Password </label>';
-	echo '<input type="password" name="password" />';
+	// Registration form
+	echo ' <form name="register" action="register.php" method="POST" 
+		onsubmit="return validateRegister()">
 
-	echo '<label>Confirm password </label>';
-	echo '<input type="password" name="password2" />';
+	<h3>voip.ms Account Information</h3>
+	<div class="row">
+		<div class="col">
+			<label class="col-sm-10 col-form-label" for="inputEmail">voip.ms Email</label>
+			<input class="form-control" id="inputEmail" placeholder="Email address" name="vms_email" required />
+		</div>
+		<div class="col">
+			<label class="col-sm-10 col-form-label" for="inputAPIPassword">voip.ms API Password </label>
+			<input type="password" class="form-control" id="inputAPIPassword" placeholder="API Password" name="vms_apiPassword" required />
+		</div>
+	</div>
 
-	echo '<h3>voip.ms Account Information</h3>';
-	echo '<label>voip.ms Email </label>';
-	echo '<input name="vms_email" />';
+	<h3>voipSMS Account Information</h3>
+	<div class="row">
+		<div class="col">
+			<label for="password1">Password</label>
+			<input class="form-control" id="password1" placeholder="Password" type="password" name="password" required />
+			<input class="form-control" id="password2" placeholder="Confirm Password" type="password" name="password" required />
+		</div>
+	</div>
 
-	echo '<label>voip.ms API Password </label>';
-	echo '<input type="password" name="vms_apiPassword" />';
-
-	echo '<input type="submit">';
-	echo '</form> ';
-	echo "</div>";
+	<input name="name" value="NONE" hidden />
+	<button type="submit" class="btn btn-primary">Submit</button>
+	</form> ';
 }
 
 /**************************************************
@@ -172,8 +203,9 @@ function createUser() {
 <!DOCTYPE html>
 <html>
 <head>
-<meta charset="utf-8">
-<link rel="stylesheet" type="text/css" href="css/main.css" />
+	<meta charset="utf-8">
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+	<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <title>voipSMS: Register</title>
 
 <script>
@@ -272,7 +304,6 @@ function validateRegister() {
 <body>
 <?php 
 	require_once('header.php');
-	echo "<div id='formErrorMessage'></div>";
 
 	// If the form was submitted, attempt to create a user.
 	// Otherwise, print the registration form 
@@ -281,12 +312,14 @@ function validateRegister() {
 	} else {
 		// Make sure that the user's not already logged in.
 		if(isset($_SESSION['auth'])) {
-			echo "<div class='error'>" .
-				"Error: You can't register a user while you're logged in.</div>";
+			echo "<div class='alert alert-error'><strong>Error:</strong> You can't register a user while you're logged in.</div>";
 		}  else {
 			printRegistrationForm();
 		}
 	}
 ?>
 </body>
+<script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
 </html>

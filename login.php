@@ -11,30 +11,32 @@ function printLoginPage($message) {
 		<head> 
 		    <meta charset="utf-8">
 			<title>voipSMS: Login</title> 
+			<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 			<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
 		</head> 
-		<body>';
+		<body class="text-center">';
 	include_once('header.php'); 
 
 	// Login form
 	echo '
-	<form action="login.php" method="POST">
+	<form class="container" action="login.php" method="POST">
+		<h1 class="h3 my-3 font-weight-normal">Sign in</h1>
 		<div class="form-group">
-			<label for="emailInput">Email Address</lable>
-			<input type="email" class="form-control" id="emailInput" aria-describedby="emailHelp" placeholder="Enter email" name="vms_email" />
+			<label for="emailInput">Email Address</label>
+			<input type="email" class="form-control" id="emailInput" aria-describedby="emailHelp" placeholder="Enter email" name="vms_email" required />
 		</div>
 	
 		<div class="form-group">
-			<label for="passwordInput">Password</lable>
-			<input type="password" class="form-control" id="passwordInput" aria-describedby="passwordHelp" placeholder="Password" name="userPassword" />
+			<label for="passwordInput">Password</label>
+			<input type="password" class="form-control" id="passwordInput" aria-describedby="passwordHelp" placeholder="Password" name="userPassword" required />
 		</div>
 
 		<button type="submit" class="btn btn-primary">Submit</button>
 	</form> ';
 
 	// Errors, if any
-	if($message !== "") {
-		echo "<div class='error'>{$message}</div>";
+	if($message != "") {
+		echo "<div class='alert alert-danger'><strong>Error:</strong> {$message}</div>";
 	}
 
 	echo '</body> 
@@ -91,12 +93,12 @@ if($_SERVER['REQUEST_METHOD'] == "GET") {
 	printLoginPage();
 } else {
 	// Also, test if they supplied the right login info
-	if(isset($_POST['vms_email'])
-	&& isset($_POST['userPassword'])) { 
+	if(isset($_POST['vms_email']) && isset($_POST['userPassword'])) { 
 		// User supplied all the right info; Attemt to log them in
 		loginUser();
+
 	} else {
-			printLoginPage("Error: Not all login information supplied.");
+		printLoginPage("Not all login information supplied.");
 	}
 }
 ?>
