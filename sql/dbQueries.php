@@ -11,6 +11,7 @@ require_once('dbinfo.php');
 	getDIDFromValue()
 	getDIDFromID()
 	getDIDs()
+	clearDefaultDID()
 	setDefaultDID()
 
 	-- Users --
@@ -138,6 +139,39 @@ function getDIDs($userID) {
 }
 
 /**************************************************
+	Clear Default DID
+
+	Removes the default DID for a user (ie: Sets it to null).
+	Returns True if it was successful, and false otherwise.
+*/
+function clearDefaultDID($userID) {
+	// Making sure the user exists
+	$user = getUser($userID);
+	if($user == False) {
+		echo "<div class='error'>Error: That user doesn't exist.</div>";
+		return False;
+	} 
+
+	// Begin altering the table entry
+	try {
+		$db = connectToDB();                                                 
+
+		// Updating default DID for the user
+		$query = "UPDATE users SET didID_default = null
+			WHERE userID = :userID";
+	
+		$stmt = $db->prepare($query);
+		$stmt->bindValue(":userID", $userID);     
+
+		$stmt->execute();
+		return True;
+	} catch(Exception $e) {
+		echo "<div class='error'>Exception caught: " . $e->getMessage() . "</div>";
+		return False;
+	}
+}
+
+/**************************************************
 	Update Default DID
 
 	Updates the default DID for a user.
@@ -153,8 +187,8 @@ function setDefaultDID($userID, $didValue) {
 
 	// Making sure the DID exists
 	$did = getDIDFromValue($didValue);
-	if($did == False) {
-		echo "<div class='error'>Error: That DID doesn't exist (didID: " . $didValue. ".</div>";
+	if($did == False && $did != null) {
+		echo "<div class='error'>Error: That DID doesn't exist (didID: " . $didValue. ").</div>";
 		return False;
 	} 
 
