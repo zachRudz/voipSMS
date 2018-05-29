@@ -6,26 +6,46 @@ require_once('sql/dbQueries.php');
 	Print add contact form
 */
 function printAddContactForm() {
-	echo "<div class='formWrapper'>";
-	echo "<h3>Add a contact</h3>";
-	echo '<form action="addContact.php" method="POST" ';
-	echo 'name="addContact" onsubmit="return validateAddContact()">';
-		echo '<label>First name</label>';
-		echo '<input name="firstName" required />';
+	echo '
+	<h1 class="h3 my-3 font-weight-normal">Add a contact</h1>
 
-		echo '<label>Last name</label>';
-		echo '<input name="lastName" required />';
+	<form action="addContact.php" method="POST"
+		name="addContact" onsubmit="return validateAddContact()">
 
-		echo '<label>Phone number</label>';
-		echo '<input name="did" type="number" required />';
+	<div class="form-group">
+		<label class="col-sm-2" for="firstNameInput">First name</label>
+		<div class="col-sm-10">
+			<input class="form-control" id="firstNameInput" 
+				placeholder="First Name" name="firstName" required />
+		</div>
+	</div>
 
-		echo '<label>Notes</label>';
-		echo '<textarea name="notes">';
-		echo '</textarea>';
+	<div class="form-group">
+		<label class="col-sm-2" for="lastNameInput">Last name</label>
+		<div class="col-sm-10">
+			<input class="form-control" id="firstNameInput" 
+				placeholder="First Name" name="lastName" />
+		</div>
+	</div>
 
-		echo '<input type="submit">';
-	echo '</form>';
-	echo "</div>";
+	<div class="form-group">
+		<label class="col-sm-2" for="didInput">Phone Number</label>
+		<div class="col-sm-10">
+			<input type="number" class="form-control" id="didInput" 
+				placeholder="1112223333" name="did" required />
+		</div>
+	</div>
+
+	<div class="form-group">
+		<label class="col-sm-2" for="notesInput">Notes</label>
+		<div class="col-sm-10">
+			<textarea class="form-control" rows="5" id="notesInput" name="notes"></textarea>
+		</div>
+	</div>
+
+	<input type="submit">
+	</form>
+	';
 }
 
 /**************************************************
@@ -143,11 +163,6 @@ require_once("pageTop.php");
 		if(form['firstName'].value == "") {
 			errors.push("First name cannot be empty.");
 			form['firstName'].classList.add('formError');
-		}
-		
-		if(form['lastName'].value == "") {
-			errors.push("Last name cannot be empty.");
-			form['lastName'].classList.add('formError');
 		}
 		
 		if(form['did'].value == "") {
