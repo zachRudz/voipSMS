@@ -102,8 +102,10 @@ require_once("imports/datatables_css.php");
 	}
 ?>
 </body>
-<?php require_once("imports/bootstrap.php"); ?>
-<?php require_once("imports/datatables.php"); ?>
+<?php 
+	require_once("pageBottom.php");
+	require_once("imports/datatables.php");
+?>
 
 <script>
 	// JQuery DataTable stuff

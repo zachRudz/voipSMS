@@ -199,6 +199,11 @@ function createUser() {
 	}
 }
 
+
+
+/**************************************************
+    Entry Point
+*/
 require_once("pageTop.php");
 ?>
 
@@ -216,13 +221,14 @@ require_once("pageTop.php");
 	} else {
 		// Make sure that the user's not already logged in.
 		if(isset($_SESSION['auth'])) {
-			echo "<div class='alert alert-error'><strong>Error:</strong> You can't register a user while you're logged in.</div>";
+			echo "<div class='alert alert-danger'><strong>Error:</strong> You can't register a user while you're logged in.</div>";
 		}  else {
 			printRegistrationForm();
 		}
 	}
 ?>
 </body>
+<?php require_once("pageBottom.php"); ?> 
 
 <script>
 // Source: http://www.w3resource.com/javascript/form/email-validation.php
@@ -315,5 +321,4 @@ function validateRegister() {
 	return true;
 }
 </script>
-<?php require_once("imports/bootstrap.php"); ?> 
 </html>

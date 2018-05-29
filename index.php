@@ -58,8 +58,14 @@ function writeLoggedInMessage() {
 	</ul>';
 	echo "</div>";
 }
+
+
+
+/**************************************************
+	Entry Point
+*/
+require_once("pageTop.php")
 ?>
-<?php require_once("pageTop.php") ?>
 	<title>voipSMS</title>
 </head>
 <body>
@@ -75,5 +81,5 @@ function writeLoggedInMessage() {
 	}
 ?>
 </body>
-<?php require_once("imports/bootstrap.php"); ?>
+<?php require_once("pageBottom.php"); ?>
 </html>

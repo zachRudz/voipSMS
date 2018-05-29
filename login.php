@@ -3,9 +3,9 @@
 	Login page
 
 	If the user didn't supply the right login info, show them to a login form.
-	Also, display $message to them.
+	Also, display $message to them in the form of an error.
 */
-function printLoginPage($message) {
+function printLoginPage($message = null) {
 	require_once("pageTop.php");
 	echo '	<title>voipSMS: Login</title> 
 		</head> 
@@ -38,6 +38,8 @@ function printLoginPage($message) {
 	require_once("pageBottom.php");
 }
 
+
+// Attempt to login the user
 function loginUser() {
 	session_start();
 	require_once("sql/dbQueries.php");
