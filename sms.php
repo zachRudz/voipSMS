@@ -51,7 +51,18 @@ require_once("smsConversation.php");
 		//	whatever they were doing.
 		// $_REQUEST['target'] should be set if they were in a conversation.
 		if(isset($_REQUEST['activeDID'])) {
-			$_SESSION['auth_info']['activeDID'] = htmlspecialchars($_REQUEST['activeDID']);
+			// Attempt to save the user's DID to the DB.
+			// This will fail if the DID recieved via the form ($_REQUEST) doesn't belong to the user.
+			// In that case, don't bother setting the $_SESSION variable.
+			if(setDefaultDID($_SESSION['auth_info']['userID'], $_REQUEST['activeDID'])) {
+				$_SESSION['auth_info']['activeDID'] = htmlspecialchars($_REQUEST['activeDID']);
+
+				echo "<div class='alert alert-success'><strong>Success:</strong>
+					Active DID updated.</div>";
+			} else {
+				echo "<div class='alert alert-error'><strong>Error:</strong>
+					Unable to set the default DID.</div>";
+			}
 		}
 
 		// Print the conversation pane

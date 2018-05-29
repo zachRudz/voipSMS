@@ -8,7 +8,11 @@ require_once('dbinfo.php');
 
 	-- User DIDs --
 	deleteUserDIDS()
+	getDIDFromValue()
+	getDIDFromID()
 	getDIDs()
+	clearDefaultDID()
+	setDefaultDID()
 
 	-- Users --
 	getUserAPICredentials()
@@ -47,6 +51,68 @@ function deleteUserDIDS($ownerID) {
 }
 
 /**************************************************
+	Get DID From Value
+
+	Returns the DID with phone number = $did.
+	Returns false if the DID doesn't exist.
+*/
+function getDIDFromValue($didValue) {
+	$db = connectToDB();
+
+	// Getting all DIDs for this user
+	try {
+		$db = connectToDB();
+		
+		// Getting all of the contacts for this user
+		$select_stmt = $db->prepare("SELECT * FROM `dids` WHERE did = :did");
+		$select_stmt->bindValue(":did", $didValue);
+		$select_stmt->execute();
+		
+		// Grab all the data
+		$res = $select_stmt->fetchAll(PDO::FETCH_ASSOC); 
+
+		// Validate
+		if(count($res) != 1)
+			return False;
+
+		return $res[0];
+	} catch(Exception $e) {
+		echo "<div class='error'>Exception caught: " . $e->getMessage() . "</div>";
+	}
+}
+
+/**************************************************
+	Get DID From ID
+
+	Returns the DID with ID = $didID.
+	Returns false if the DID doesn't exist.
+*/
+function getDIDFromID($didID) {
+	$db = connectToDB();
+
+	// Getting all DIDs for this user
+	try {
+		$db = connectToDB();
+		
+		// Getting all of the contacts for this user
+		$select_stmt = $db->prepare("SELECT * FROM `dids` WHERE didID = :didID");
+		$select_stmt->bindValue(":didID", $didID);
+		$select_stmt->execute();
+		
+		// Grab all the data
+		$res = $select_stmt->fetchAll(PDO::FETCH_ASSOC); 
+
+		// Validate
+		if(count($res) != 1)
+			return False;
+
+		return $res[0];
+	} catch(Exception $e) {
+		echo "<div class='error'>Exception caught: " . $e->getMessage() . "</div>";
+	}
+}
+
+/**************************************************
 	Get user DIDs
 
 	Returns an array of user DIDs
@@ -71,6 +137,87 @@ function getDIDs($userID) {
 		echo "<div class='error'>Exception caught: " . $e->getMessage() . "</div>";
 	}
 }
+
+/**************************************************
+	Clear Default DID
+
+	Removes the default DID for a user (ie: Sets it to null).
+	Returns True if it was successful, and false otherwise.
+*/
+function clearDefaultDID($userID) {
+	// Making sure the user exists
+	$user = getUser($userID);
+	if($user == False) {
+		echo "<div class='error'>Error: That user doesn't exist.</div>";
+		return False;
+	} 
+
+	// Begin altering the table entry
+	try {
+		$db = connectToDB();                                                 
+
+		// Updating default DID for the user
+		$query = "UPDATE users SET didID_default = null
+			WHERE userID = :userID";
+	
+		$stmt = $db->prepare($query);
+		$stmt->bindValue(":userID", $userID);     
+
+		$stmt->execute();
+		return True;
+	} catch(Exception $e) {
+		echo "<div class='error'>Exception caught: " . $e->getMessage() . "</div>";
+		return False;
+	}
+}
+
+/**************************************************
+	Update Default DID
+
+	Updates the default DID for a user.
+	Returns true if successful, and false if the DID doesn't belong to the user.
+*/
+function setDefaultDID($userID, $didValue) {
+	// Making sure the user exists
+	$user = getUser($userID);
+	if($user == False) {
+		echo "<div class='error'>Error: That user doesn't exist.</div>";
+		return False;
+	} 
+
+	// Making sure the DID exists
+	$did = getDIDFromValue($didValue);
+	if($did == False && $did != null) {
+		echo "<div class='error'>Error: That DID doesn't exist (didID: " . $didValue. ").</div>";
+		return False;
+	} 
+
+	// Making sure the user owns the DID
+	if($did['ownerID'] != $user['userID']) {
+		echo "<div class='error'>Error: That user doesn't own that DID.</div>";
+		return False;
+	}
+
+	// Begin altering the table entry
+	try {
+		$db = connectToDB();                                                 
+
+		// Updating default DID for the user
+		$query = "UPDATE users SET didID_default = :didID
+			WHERE userID = :userID";
+	
+		$stmt = $db->prepare($query);
+		$stmt->bindValue(":didID", $did['didID']);     
+		$stmt->bindValue(":userID", $userID);     
+
+		$stmt->execute();
+		return True;
+	} catch(Exception $e) {
+		echo "<div class='error'>Exception caught: " . $e->getMessage() . "</div>";
+		return False;
+	}
+}
+
 
 /**************************************************
 	Get user API Credentials
@@ -221,7 +368,7 @@ function getUserFromLogin($vms_email, $vms_password) {
 		$db = connectToDB();                                                 
 
 		// Validating user login against db                                  
-		$stmt = $db->prepare("SELECT userID, name
+		$stmt = $db->prepare("SELECT userID, name, didID_default
 		FROM users WHERE                                                 
 		vms_email=:vms_email AND userPassword=SHA2(:userPassword,256)"); 
 		

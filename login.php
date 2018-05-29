@@ -55,14 +55,14 @@ function loginUser() {
 		$_SESSION['auth'] = TRUE;
 		$_SESSION['auth_info'] = $userData[0];
 
-		// -- Setting the user's active DID --
-		// Getting the user's DIDs
-		$dids = getDIDs($_SESSION['auth_info']['userID']);
-		if(count($dids) == 0) {
-			$_SESSION['auth_info']['activeDID'] = "No user DID selected.";
+		// Fetching the DID for the user's default DID.
+		$activeDID = getDIDFromID($userData[0]['didID_default']);
+		if($activeDID != false) {
+			$_SESSION['auth_info']['activeDID'] = $activeDID['did'];
 		} else {
-			$_SESSION['auth_info']['activeDID'] = $dids[0]['did'];
+			$_SESSION['auth_info']['activeDID'] = null;
 		}
+		//print_r($_SESSION);
 
 		// Head back home
 		header("Location: index.php");
