@@ -8,111 +8,73 @@ function displayEditContactForm($contactID) {
 
 	// Making sure things are k (Found the contact, and it belongs to $userID)
 	if($contact['status'] == "not_found") {
-		echo "<div class='error'>Error: No contact found with that ID.</div>";
+		echo "<div class='alert alert-danger'><strong>Error:</strong>
+			No contact found with that ID.</div>";
 		return;
 	} else if($contact['status'] == "not_owner") {
-		echo "<div class='error'>Error: This contact does not belong to you!</div>";
+		echo "<div class='alert alert-danger'><strong>Error:</strong>
+			This contact does not belong to you!</div>";
 		return;
 	} else if($contact['status'] != "success") {
-		echo "<div class='error'>Unexpected error: Unable to get contact.</div>";
+		echo "<div class='alert alert-danger'><strong>Error:</strong>
+			Unable to get contact.</div>";
 		return;
 	}
 
-	echo "<div class='formWrapper'>";
-	echo "	<form action='editContact.php' method='POST'";
-	echo "	 name='editContact' onsubmit='return validateEditContact()'>";
-	echo "		<h3>Edit Contact</h3>";
-	echo "		<input name='contactID' type='hidden' value='{$contactID}' />";
+    echo "
+    <h1 class='h3 my-3 font-weight-normal'>Add a contact</h1>
 
-	echo "		<label>First name</label>";
-	echo "		<input name='firstName' value='{$contact['firstName']}' />";
+	<form action='editContact.php' method='POST'
+		name='editContact' onsubmit='return validateEditContact()'>
+		
+	<input name='contactID' type='hidden' value='{$contactID}' />
 
-	echo "		<label>Last name</label>";
-	echo "		<input name='lastName' value='{$contact['lastName']}' />";
+    <div class='form-group'>
+        <label class='col-sm-2' for='firstNameInput'>First name</label>
+        <div class='col-sm-10'>
+            <input class='form-control' id='firstNameInput' name='firstName'
+                placeholder='First Name' value='{$contact['firstName']}' required />
+        </div>
+    </div>
 
-	echo "		<label>Phone number</label>";
-	echo "		<input name='did' type='number' value='{$contact['did']}' />";
+    <div class='form-group'>
+        <label class='col-sm-2' for='lastNameInput'>Last name</label>
+        <div class='col-sm-10'>
+            <input class='form-control' id='lastNameInput' name='lastName' 
+                placeholder='Last Name' value='{$contact['lastName']}' required />
+        </div>
+    </div>
 
-	echo "		<label>Notes</label>";
-	echo "		<textarea name='notes'>" . $contact['notes'] . "</textarea>";
+    <div class='form-group'>
+        <label class='col-sm-2' for='didInput'>Phone Number</label>
+        <div class='col-sm-10'>
+            <input type='number' class='form-control' id='didInput' 
+                placeholder='1112223333' name='did' required value='{$contact['did']}' />
+        </div>
+    </div>
 
-	echo "		<input type='submit' value='Save' />";
-	echo "	</form>";
-	echo "</div>";
+
+    <div class='form-group'>
+        <label class='col-sm-2' for='notesInput'>Notes</label>
+        <div class='col-sm-10'>
+            <textarea class='form-control' rows='5' id='notesInput' name='notes'>{$contact['notes']}</textarea>
+        </div>
+    </div>
+
+	<input type='submit' value='Save' />
+    </form>
+    ";
 }
+
+
+
+/**************************************************
+    Entry Point
+*/
+require_once("pageTop.php");
 ?>
 
-<!DOCTYPE html>
-<html>
-<head>
-	<link rel="stylesheet" type="text/css" href="css/main.css" />
 	<title>voipSMS</title>
-
-	<script>
-	function validateDID(did) {
-		if(/\d{10}/.test(did))
-			return (true)
-
-		return (false)
-	}
-
-	// Make sure form is filled completely and such.
-	function validateEditContact() {
-	var errors = [];
-	var form = document.forms['editContact'];
-	var errorMessage = document.getElementById('formErrorMessage');
-	
-	// Clear error classes from inputs
-	form['firstName'].classList.remove("formError");
-	form['lastName'].classList.remove("formError");
-	form['did'].classList.remove("formError");
-	errorMessage.classList.remove('error');
-	
-	// Clear the error div
-	errorMessage.innerHTML = "";
-	
-	// -- Begin processing form --
-	// Making sure values aren't empty
-	if(form['firstName'].value == "") {
-		errors.push("First Name cannot be empty.");
-		form['firstName'].classList.add('formError');
-	}
-	
-	if(form['lastName'].value == "") {
-		errors.push("Last name cannot be empty.");
-		form['lastName'].classList.add('formError');
-	}
-	
-	if(form['did'].value == "") {
-		errors.push("Contact phone number cannot be empty.");
-		form['did'].classList.add('formError');
-	}
-	
-	// Making sure DID is valid
-	if(!validateDID(form['did'].value)) {
-		errors.push("Contact phone number isn't valid.");
-		form['did'].classList.add('formError');
-	}
-	
-	
-	// -- Writing errors --
-	var numErrors = errors.length;
-	if(numErrors > 0) {
-		// Loop though errors and write them to the error message div
-		errorMessage.innerHTML = "Errors found while processing the form:";
-		
-		for(var i = 0; i < numErrors; i++) {
-			errorMessage.innerHTML += "<br />";
-			errorMessage.innerHTML += errors[i];
-		}
-		
-		errorMessage.classList.add('error');
-		return false;
-		}
-		
-		return true;
-	}
-	</script>
 </head>
 <body>
 	<?php 
@@ -121,7 +83,10 @@ function displayEditContactForm($contactID) {
 
 	// Checking if we're logged in
 	if(!isset($_SESSION['auth'])) {
-		echo "<div id='error'>Error: You must be logged in to visit this page</div>"; } else {
+		echo "<div id='alert alert-danger'><strong>Error:</strong>
+			You must be logged in to visit this page</div>"; 
+	} else {
+
 		// If HTTP GET, display the form. 
 		// If HTTP POST, process the form, and redirect to contact list
 		if($_SERVER['REQUEST_METHOD'] == "GET") {
@@ -133,7 +98,8 @@ function displayEditContactForm($contactID) {
 			// Make sure that the user actually selected a contact
 			//	either in the contactList form, or from returning to this form
 			if(!isset($_REQUEST['contactID'])) {
-				echo "<div id='error'>Error: No contact ID given.</div>";
+				echo "<div id='alert alert-danger'><strong>Error:</strong>
+					No contact ID given.</div>"; 
 			} else {
 				displayEditContactForm($_REQUEST['contactID']);
 			}
@@ -164,21 +130,90 @@ function displayEditContactForm($contactID) {
 					$_POST['did'],
 					$notes);
 
+				// Let the user know what happened.
 				if($ret['status'] == "success") {
-					echo "<div class='message'>Contact updated.</div>";
+					echo "<div class='alert alert-success'><strong>Success!</strong> 
+						Contact updated. 
+						<a class='alert-link' href='contactList.php'>Back to contacts list</a>
+						</div>";
 				} else {
-					echo "<div class='message'>Contact not updated (reason: {$ret['status']}";
-					echo "</div>";
+					echo "<div class='alert alert-danger'><strong>Error:</strong> 
+						Contact not updated (reason: {$ret['status']}).
+						<a class='alert-link' href='contactList.php'>Back to contacts list</a>
+						</div>";
 				}
-
-				echo "<a href='contactList.php'>Back to contacts list</a>";
 				//header("Location: contactList.php");
 
 			} else {
-				echo "<div id='error'>Error: Missing some form data!</div>"; 
+				echo "<div class='alert alert-danger'><strong>Error!</strong> 
+					Missing some form data!
+					<a class='alert-link' href='contactList.php'>Back to contacts list</a>
+					</div>"; 
 			}
 		}
 	}
 	?>
 </body>
+<?php require_once("pageBottom.php"); ?>
+
+<script>
+function validateDID(did) {
+	var re = new RegExp("^\\d+$");
+	return re.test(did);
+}
+
+// Make sure form is filled completely and such.
+function validateEditContact() {
+	var errors = [];
+	var form = document.forms['editContact'];
+	var errorMessage = document.getElementById('formErrorMessage');
+	
+	// Clear error classes from inputs
+	errorMessage.classList.remove('alert');
+	errorMessage.classList.remove('alert-danger');
+	
+	// Clear the error div
+	errorMessage.innerHTML = "";
+	
+	// -- Begin processing form --
+	// Making sure values aren't empty
+	if(form['firstName'].value == "") {
+		errors.push("First Name cannot be empty.");
+	}
+	
+	if(form['lastName'].value == "") {
+		errors.push("Last name cannot be empty.");
+	}
+	
+	if(form['did'].value == "") {
+		errors.push("Contact phone number cannot be empty.");
+	}
+	
+	// Making sure DID is valid
+	console.log(form['did'].value);
+	console.log(validateDID(form['did'].value));
+	if(!validateDID(form['did'].value)) {
+		errors.push("Contact phone number isn't valid.");
+	}
+	
+	
+	// -- Writing errors --
+	var numErrors = errors.length;
+	if(numErrors > 0) {
+		// Loop though errors and write them to the error message div
+		errorMessage.innerHTML = "Errors found while processing the form:";
+		
+		for(var i = 0; i < numErrors; i++) {
+			errorMessage.innerHTML += "<br />";
+			errorMessage.innerHTML += errors[i];
+		}
+		
+		errorMessage.classList.add('alert');
+		errorMessage.classList.add('alert-danger');
+		return false;
+	}
+	
+	return true;
+}
+</script>
 </html>

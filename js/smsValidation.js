@@ -7,12 +7,11 @@
 	This is the format that voip.ms takes in their API.
 */
 
-function validateDID(did) { 
-    if(/\d{10}/.test(did))  
-		return (true)       
+function validateDID(did) {
+    var re = new RegExp("^\\d+$");
+	    return re.test(did);
+}
 
-	return (false)          
-}                           
 
 /**************************************************
 	Validate date

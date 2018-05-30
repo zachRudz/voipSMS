@@ -14,19 +14,19 @@ function deleteMarkedContacts() {
 	// -- Validation --
 	// Making sure we're logged in
 	if(!isset($_SESSION['auth'])) {
-		echo "<div class='error'>Error: You must be logged in to do that!</div>";
+		echo "<div class='alert alert-danger'>Error: You must be logged in to do that!</div>";
 		return;
 	}
 			
 	// Making sure the form was submitted properly
 	if($_SERVER['REQUEST_METHOD'] != "POST") {
-		echo "<div class='error'>Error: The form wasn't filled out properly</div>";
+		echo "<div class='alert alert-danger'>Error: The form wasn't filled out properly</div>";
 		return;
 	}
 
 	// Making sure that there were entries in the form
 	if(!isset($_POST['contactID']))  {
-		echo "<div class='error'>Error: No contacts selected for deletion</div>";
+		echo "<div class='alert alert-danger'>Error: No contacts selected for deletion</div>";
 		return;
 	}
 
@@ -51,7 +51,7 @@ function deleteMarkedContacts() {
 
 	// Show all the errors if any exist
 	if(count($errors) > 0) {
-		echo "<div class='error'>"; 
+		echo "<div class='alert alert-danger'>"; 
 		echo "Something went wrong when deleting one or more contacts.";
 		echo "<ul>";
 
@@ -60,26 +60,36 @@ function deleteMarkedContacts() {
 		}
 
 		echo "</ul>";
+
+		echo '<a class="alert-link" href="contactList.php">Back to contacts list.</a>';
 		echo "</div>"; 
+
+		return false;
 	}
+
+	return true;
 }
 
 /**************************************************
 	Entry Point
 */
+require_once("pageTop.php");
 ?>
-<!DOCTYPE html>
-<html>
-<head>
-    <meta charset="utf-8">
-	<link rel="stylesheet" type="text/css" href="css/main.css" />
 	<title>voipSMS</title>
 </head>
 <body>
 <?php 
 	include_once("header.php");
-	deleteMarkedContacts();
-	echo "<a href='contactList.php'>Back to contacts list.</a>";	
+
+	// Attempt to delete the contact. Print a success message if it worked
+	if(deleteMarkedContacts()) {
+		echo '
+		<div class="alert alert-success">
+			<strong>Success!</strong>
+			<a class="alert-link" href="contactList.php">Back to contacts list.</a>
+		</div>';
+	}
 ?>
 </body>
+<?php require_once("pageBottom.php");?>
 </html>

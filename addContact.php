@@ -23,7 +23,7 @@ function printAddContactForm() {
 	<div class="form-group">
 		<label class="col-sm-2" for="lastNameInput">Last name</label>
 		<div class="col-sm-10">
-			<input class="form-control" id="firstNameInput" 
+			<input class="form-control" id="lastNameInput" 
 				placeholder="First Name" name="lastName" />
 		</div>
 	</div>
@@ -135,64 +135,62 @@ require_once("pageTop.php");
 <?php require_once("pageBottom.php"); ?>
 
 <script>
-	function validateDID(did) {
-		if(/\d{10}/.test(did))
-			return (true)
-		
-		return (false)
+function validateDID(did) {
+    var re = new RegExp("^\\d+$");
+    return re.test(did);
+}
+	
+// Make sure form is filled completely and such.
+function validateAddContact() {
+	var errors = [];
+	var form = document.forms['addContact'];
+	var errorMessage = document.getElementById('formErrorMessage');
+	
+	// Clear error classes from inputs
+	form['firstName'].classList.remove("formError");
+	form['lastName'].classList.remove("formError");
+	form['did'].classList.remove("formError");
+	errorMessage.classList.remove('alert');
+	errorMessage.classList.remove('alert-danger');
+	
+	// Clear the error div
+	errorMessage.innerHTML = "";
+	
+	// -- Begin processing form --
+	// Making sure values aren't empty
+	if(form['firstName'].value == "") {
+		errors.push("First name cannot be empty.");
+		form['firstName'].classList.add('formError');
 	}
 	
-	// Make sure form is filled completely and such.
-	function validateAddContact() {
-		var errors = [];
-		var form = document.forms['addContact'];
-		var errorMessage = document.getElementById('formErrorMessage');
-		
-		// Clear error classes from inputs
-		form['firstName'].classList.remove("formError");
-		form['lastName'].classList.remove("formError");
-		form['did'].classList.remove("formError");
-		errorMessage.classList.remove('alert');
-		errorMessage.classList.remove('alert-danger');
-		
-		// Clear the error div
-		errorMessage.innerHTML = "";
-		
-		// -- Begin processing form --
-		// Making sure values aren't empty
-		if(form['firstName'].value == "") {
-			errors.push("First name cannot be empty.");
-			form['firstName'].classList.add('formError');
-		}
-		
-		if(form['did'].value == "") {
-			errors.push("Contact phone number cannot be empty.");
-			form['did'].classList.add('formError');
-		}
-	
-		// Making sure the contact DID is in the right format (dddddddddd)
-		if(!validateDID(form['did'].value)) {
-			errors.push("Contact phone number is not in the right format. Example format: '1231231234'");
-			form['did'].classList.add('formError');
-		}
-	
-		// -- Writing errors --                                                
-		var numErrors = errors.length;                                         
-		if(numErrors > 0) {                                                    
-			// Loop though errors and write them to the error message div      
-			errorMessage.innerHTML = "<strong>Error:</strong> The form wasn't filled out properly:";
-			
-			for(var i = 0; i < numErrors; i++) {                               
-				errorMessage.innerHTML += "<br />";                            
-				errorMessage.innerHTML += errors[i];                           
-			}                                                                  
-			
-			errorMessage.classList.add('alert');                               
-			errorMessage.classList.add('alert-danger');                               
-			return false;                                                      
-		}                                                                      
-		
-		return true;                                                           
+	if(form['did'].value == "") {
+		errors.push("Contact phone number cannot be empty.");
+		form['did'].classList.add('formError');
 	}
+
+	// Making sure the contact DID is in the right format (dddddddddd)
+	if(!validateDID(form['did'].value)) {
+		errors.push("Contact phone number is not in the right format. Example format: '1231231234'");
+		form['did'].classList.add('formError');
+	}
+
+	// -- Writing errors --                                                
+	var numErrors = errors.length;                                         
+	if(numErrors > 0) {                                                    
+		// Loop though errors and write them to the error message div      
+		errorMessage.innerHTML = "<strong>Error:</strong> The form wasn't filled out properly:";
+		
+		for(var i = 0; i < numErrors; i++) {                               
+			errorMessage.innerHTML += "<br />";                            
+			errorMessage.innerHTML += errors[i];                           
+		}                                                                  
+		
+		errorMessage.classList.add('alert');                               
+		errorMessage.classList.add('alert-danger');                               
+		return false;                                                      
+	}                                                                      
+	
+	return true;                                                           
+}
 </script>
 </html>

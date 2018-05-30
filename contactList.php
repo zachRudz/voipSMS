@@ -97,7 +97,7 @@ require_once("imports/datatables_css.php");
 		listContacts();		
 	} else {
 		// User isn't logged in, tell them
-		echo '<div id="error">'; 
+		echo '<div class="alert alert-danger">'; 
 		echo "Error: You can't add a contact while you're logged out.</div>";
 	}
 ?>
@@ -122,7 +122,8 @@ require_once("imports/datatables_css.php");
 		var errorMessage = document.getElementById('formErrorMessage');
 		
 		// Clear error classes from inputs
-		errorMessage.classList.remove('error');
+		errorMessage.classList.remove('alert');
+		errorMessage.classList.remove('alert-danger');
 		
 		// Clear the error div
 		errorMessage.innerHTML = "";
@@ -151,7 +152,8 @@ require_once("imports/datatables_css.php");
 			errorMessage.innerHTML += errors[i];
 			}
 			
-			errorMessage.classList.add('error');
+			errorMessage.classList.add('alert');
+			errorMessage.classList.add('alert-danger');
 			return false;
 		}
 		
