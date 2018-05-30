@@ -218,14 +218,14 @@ function validateSendSMS() {
 	
 	// -- Begin processing form --
 	// Making sure the limit is valid
-	if(form['message'].value < 1 || form['message'].value > 160) {
-		errors.push("Message must be between 0-160 characters.");
+	if(form['message'].value < 1 || form['message'].value >= 160) {
+		errors.push("Message must be between 1-160 characters.");
 		form['message'].classList.add("formError");
 	}
 
 	// Making sure contact DID is valid
 	if(!validateDID(form['target'].value)) {
-			errors.push("Contact phone number is not in the right format. Example format: '1231231234'");
+		errors.push("Contact phone number is not in the right format. Example format: '1231231234'");
 	}
 
 	// -- Writing errors --

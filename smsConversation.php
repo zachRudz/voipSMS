@@ -296,7 +296,6 @@ function displaySendSMSForm($target) {
 	echo '		name="sendSMS" onsubmit="return validateSendSMS()">';
 		// Used for js client-side validation
 		echo "<input type='hidden' name='target' value='{$target}' />";
-		echo "<input type='hidden' name='activeDID' value='{$_SESSION['auth_info']['activeDID']}' />";
 
 		echo '<textarea id="sendSMS" name="message" maxlength="160" required ';
 		echo 'placeholder="Send an SMS..."></textarea>';
