@@ -53,20 +53,20 @@ function displayAccountForm($userID) {
 		<div class='form-group row'>
 			<label class='col-sm-2 col-form-label' for='currentPasswordInput'>Current Password</label>
 			<div class='col-sm-10'>
-				<input class='form-control' id='currentPasswordInput' placeholder='Current Password' 
-					name='currentPassword' />
+				<input type='password' class='form-control' id='currentPasswordInput' 
+					placeholder='Current Password' name='currentPassword' />
 			</div>
 
 			<label class='col-sm-2 col-form-label' for='passwordInput'>New Password</label>
 			<div class='col-sm-10'>
-				<input class='form-control' id='passwordInput' placeholder='New Password' 
-					name='password' />
+				<input type='password' class='form-control' id='passwordInput' 
+					placeholder='New Password' name='password' />
 			</div>
 
 			<label class='col-sm-2 col-form-label' for='password2Input'>Confirm Password</label>
 			<div class='col-sm-10'>
-				<input class='form-control' id='password2Input' placeholder='New Password' 
-					name='password2' />
+				<input type='password' class='form-control' id='password2Input' 
+					placeholder='New Password' name='password2' />
 			</div>
 		</div>
 		
@@ -265,12 +265,12 @@ function validateAccountChange() {
 		// User filled out current password, but not the new ones
 		if(form['password'].value == "") {
 			errors.push("You're attempting to change your password," +
-				"but you didn't fill out the new password.");
+				" but you didn't fill out the new password.");
 		}
 
 		if(form['password2'].value == "") {
 			errors.push("You're attempting to change your password," +
-				"but you didn't fill out the confirmation password.");
+				" but you didn't fill out the confirmation password.");
 		}
 
 	} else {
