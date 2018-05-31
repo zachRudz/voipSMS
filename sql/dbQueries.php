@@ -282,7 +282,7 @@ function getUser($userID) {
 	Changes the values of an existing user.
 	If a value is null, don't change it.
 */
-function alterUser($userID, $name, $vms_apiPassword, $userPassword, $currentPassword) {
+function alterUser($userID, $vms_apiPassword, $userPassword, $currentPassword) {
 	// Making sure the user exists
 	$user = getUser($userID);
 	if($user == False) {
@@ -290,14 +290,7 @@ function alterUser($userID, $name, $vms_apiPassword, $userPassword, $currentPass
 		return False;
 	}
 
-	// Testing if name is null. If so, don't change it 
-	if(trim($name) == "") {
-		$new_name = $user['name'];
-	} else {
-		$new_name = $name;
-	}
-
-	// Testing if name is null. If so, don't change it 
+	// Testing if api password is null. If so, don't change it 
 	if(trim($vms_apiPassword) == "") {
 		$new_vms_apiPassword = $user['vms_apiPassword'];
 	} else {
@@ -327,24 +320,20 @@ function alterUser($userID, $name, $vms_apiPassword, $userPassword, $currentPass
 		// Begin updating the contact
 		if($passwordChange) {
 			// User is changing their password
-			$query = "UPDATE users SET name = :name,
-				vms_apiPassword = :vms_apiPassword,
+			$query = "UPDATE users SET vms_apiPassword = :vms_apiPassword,
 				userPassword = SHA2(:userPassword,256)
 				WHERE userID = :userID";
 	
 			$stmt = $db->prepare($query);
-			$stmt->bindValue(":name", trim($new_name));     
 			$stmt->bindValue(":vms_apiPassword", trim($new_vms_apiPassword));     
 			$stmt->bindValue(":userPassword", trim($userPassword));     
 			$stmt->bindValue(":userID", $userID);     
 		} else {
 			// User isn't changing their password, or they failed to authenticate their password
-			$query = "UPDATE users SET name = :name,
-				vms_apiPassword = :vms_apiPassword
+			$query = "UPDATE users SET vms_apiPassword = :vms_apiPassword
 				WHERE userID = :userID";
 	
 			$stmt = $db->prepare($query);
-			$stmt->bindValue(":name", trim($new_name));     
 			$stmt->bindValue(":vms_apiPassword", trim($new_vms_apiPassword));     
 			$stmt->bindValue(":userID", $userID);     
 		}
@@ -368,7 +357,7 @@ function getUserFromLogin($vms_email, $vms_password) {
 		$db = connectToDB();                                                 
 
 		// Validating user login against db                                  
-		$stmt = $db->prepare("SELECT userID, name, didID_default
+		$stmt = $db->prepare("SELECT userID, didID_default
 		FROM users WHERE                                                 
 		vms_email=:vms_email AND userPassword=SHA2(:userPassword,256)"); 
 		

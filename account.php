@@ -26,7 +26,7 @@ function displayAccountForm($userID) {
 
 	// Making sure we got the user
 	if($user == False) {
-		echo "<div id='alert alert-danger'><strong>Error:</strong> No user found with that ID.</div>";
+		echo "<div class='alert alert-danger'><strong>Error:</strong> No user found with that ID.</div>";
 		return;
 	}
 	
@@ -38,16 +38,6 @@ function displayAccountForm($userID) {
 
 	<form action='account.php' method='POST'
 		name='accountChange' onsubmit='return validateAccountChange()'>
-		
-		<h4>Change name</h4>
-		<div class='form-group row'>
-			<label class='col-sm-2 col-form-label' for='nameInput'>Name</label>
-			<div class='col-sm-10'>
-				<input class='form-control' id='nameInput' placeholder='Name' 
-					name='name' value='{$user['name']}' />
-			</div>
-		</div>
-
 		
 		<h4>Change password</h4>
 		<div class='form-group row'>
@@ -105,9 +95,7 @@ function displayAccountForm($userID) {
 function processAccountChanges() {
 	// Setting form fields to "" if they're not filled out
 
-	if(isset($_POST['name'])
-		&& isset($_POST['name'])
-		&& isset($_POST['password'])
+	if(isset($_POST['password'])
 		&& isset($_POST['password2']) 
 		&& isset($_POST['currentPassword']) 
 		&& isset($_POST['vms_apiPassword'])) {
@@ -116,11 +104,6 @@ function processAccountChanges() {
 		// userID
 		$userID = $_SESSION['auth_info']['userID'];
 
-		// name
-		if(trim($_POST['name']) == "")
-			$name = "";
-		else
-			$name = $_POST['name'];
 
 		// password 
 		if(trim($_POST['password']) == "")
@@ -143,26 +126,25 @@ function processAccountChanges() {
 		// Make sure that if passwords are set, then they're the same
 		if(trim($_POST['password']) == "") {
 			if(trim($_POST['password']) != trim($_POST['password'])) {
-				echo "<div id='alert alert-danger'><strong>Error:</strong> Passwords don't match!</div>";
+				echo "<div class='alert alert-danger'><strong>Error:</strong> Passwords don't match!</div>";
 				return;
 			}
 		}
 
 		// Make sure that the password meets the length requirement
 		if(strlen($_POST['password']) < 8 && $_POST['password'] != "") {
-				echo "<div id='alert alert-danger'><strong>Error:</strong>
+				echo "<div class='alert alert-danger'><strong>Error:</strong>
 					New password doesn't meet length requirements!</div>";
 				return;
 		}
 
 		// Make the dank changes
 		return alterUser($userID,
-			$name,
 			$vms_apiPassword,
 			$userPassword,
 			$currentPassword);
 	} else {
-		echo "<div id='alert alert-danger'><strong>Error:</strong>
+		echo "<div class='alert alert-danger'><strong>Error:</strong>
 			Form not filled out properly. </div>";
 		return;
 	}
@@ -189,11 +171,11 @@ require_once("pageTop.php");
 		//	or process the form on HTTP POST if it was filled out
 		//	or sync the dids on HTTP POST if the user clicked that button
 		if($_SERVER['REQUEST_METHOD'] == "POST") {
+			// User is changing their passwords. 
 			if($_POST['submit'] == 'Save') {
-				// Processing the account form
 				if(processAccountChanges()) {
-					echo "<div class='message'>";
-					echo "Changes applied successfully.";
+					echo "<div class='alert alert-success'>";
+					echo "<strong>Success!</strong> Account information updated.";
 					echo "</div>";
 				}
 
@@ -203,28 +185,31 @@ require_once("pageTop.php");
 					base64_decode($user['vms_apiPassword']));
 
 				if($res['status'] != "success") {
-					echo "<div class='warning'>";
-					echo "Warning: The current voip.ms API password doesn't validate";
-					echo "(Reason: {$res['status']})</div>";
+					echo "<div class='alert alert-warning'>
+					<strong>Warning:</strong>
+					 VoIP.ms API password saved successfully, but it doesn't validate against their server!
+					 (Reason: {$res['status']})</div>";
 				}
 
-				// Updating the session variable
-				$_SESSION['auth_info']['name'] = $user['name'];
+			// Syncing DIDs.	
 			} else if($_POST['submit'] == 'Sync DIDs') {
-
-				// Syncing DIDs.	
 				if(syncUserDIDs($_SESSION['auth_info']['userID'])) {
-					echo "<div class='message'>DIDs synced successfully</div>";
+					echo "<div class='alert alert-success'><strong>Success!</strong>
+						DIDs have been synced.</div>";
 
 					// Updating the active did
 					$dids = getDIDs($_SESSION['auth_info']['userID']);
 					$_SESSION['auth_info']['activeDID'] = $dids[0]['did'];
 				} else {
-					echo "<div class='message'>DIDs not synced.</div>";
+					echo "<div class='alert alert-danger'><strong>Error: </strong>
+						Unable to sync DIDs</div>";
 				}
+
 			} else {
-				// wat
-				echo "<div id='error'>Unexpected form submission recieved.</div>";
+				// User isn't updating their passwords, or syncing their dids.
+				// They're probably misusing with the forms.
+				echo "<div class='alert alert-danger'><strong>Error:</strong>
+					Unexpected form submission recieved.</div>";
 			}
 		}
 

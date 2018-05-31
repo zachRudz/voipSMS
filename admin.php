@@ -26,7 +26,6 @@ function displayUsers() {
 	echo "		<tr>";
 	echo "			<th>Delete</th>";
 	echo "			<th>ID</th>";
-	echo "			<th>Name</th>";
 	echo "			<th>Email</th>";
 	echo "			<th>User type</th>";
 	echo "		</tr>";
@@ -48,7 +47,6 @@ function displayUsers() {
 				value='{$data['userID']}'</td>";
 
 			echo "<td>{$data['userID']}</td>";
-			echo "<td>{$data['name']}</td>";
 			echo "<td>{$data['vms_email']}</td>";
 
 			if($data['userType'] == 'U')

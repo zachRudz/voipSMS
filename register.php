@@ -69,11 +69,10 @@ function printRegistrationForm() {
 		<div class="col">
 			<label for="password1">Password</label>
 			<input class="form-control" id="password1" placeholder="Password" type="password" name="password" required />
-			<input class="form-control" id="password2" placeholder="Confirm Password" type="password" name="password" required />
+			<input class="form-control" id="password2" placeholder="Confirm Password" type="password" name="password2" required />
 		</div>
 	</div>
 
-	<input name="name" value="NONE" hidden />
 	<button type="submit" class="btn btn-primary">Submit</button>
 	</form> ';
 }
@@ -94,11 +93,10 @@ function createUser() {
 	$errors = array();
 
 	// Making sure everything's set
-	if(isset($_POST['name']) &&
-	isset($_POST['password']) &&
-	isset($_POST['password2']) &&
-	isset($_POST['vms_email']) &&
-	isset($_POST['vms_apiPassword'])) { 
+	if(isset($_POST['password']) &&
+		isset($_POST['password2']) &&
+		isset($_POST['vms_email']) &&
+		isset($_POST['vms_apiPassword'])) { 
 		// Begin testing the actual contents of the form
 
 		// Making sure that the email isn't a duplicate
@@ -110,12 +108,6 @@ function createUser() {
 			$validated = False;
 			$errors[] = "A user with this email already exists.";
 		} 
-
-		// Testing if the username is long enough
-		if(strlen(trim($_POST['name'])) < 2) {
-			$validated = False;
-			$errors[] = "Name is too short (min 3 characters).";
-		}
 
 		// Testing if the passwords match
 		if($_POST['password'] != $_POST['password2']) {
@@ -166,12 +158,11 @@ function createUser() {
 	}
 	
 	// -- Adding user to db --
-	$add_stmt = $db->prepare("INSERT INTO `users` (`vms_email`, `vms_apiPassword`, `userPassword`, `name`) VALUES (:vms_email, :vms_apiPassword, SHA2(:userPassword,256), :name)");
+	$add_stmt = $db->prepare("INSERT INTO `users` (`vms_email`, `vms_apiPassword`, `userPassword`) VALUES (:vms_email, :vms_apiPassword, SHA2(:userPassword,256))");
 	
 	$add_stmt->bindValue(":vms_email", trim($_POST['vms_email']));
 	$add_stmt->bindValue(":vms_apiPassword", base64_encode(trim($_POST['vms_apiPassword'])));
 	$add_stmt->bindValue(":userPassword", trim($_POST['password']));
-	$add_stmt->bindValue(":name", trim($_POST['name']));
 	$add_stmt->execute();
 
 	if($add_stmt->rowCount() != 1) {
@@ -246,7 +237,6 @@ function validateRegister() {
 	var errorMessage = document.getElementById('formErrorMessage');
 
 	// Clear error classes from inputs
-	form['name'].classList.remove("formError");
 	form['password'].classList.remove("formError");
 	form['password2'].classList.remove("formError");
 	form['vms_email'].classList.remove("formError");
@@ -258,11 +248,6 @@ function validateRegister() {
 
 	// -- Begin processing form --
 	// Making sure values aren't empty
-	if(form['name'].value == "") {
-		errors.push("Name cannot be empty.");
-		form['name'].classList.add('formError');
-	}
-
 	if(form['password'].value == "") {
 		errors.push("Password cannot be empty.");
 		form['password'].classList.add('formError');
@@ -289,11 +274,6 @@ function validateRegister() {
 	if(form['password'].value.length < 8) {
 		errors.push("Password isn't long enough (Min 8 characters).");
 		form['password'].classList.add('formError');
-	}
-
-	if(form['name'].value.length < 2) {
-		errors.push("Name isn't long enough (Min 2 characters).");
-		form['name'].classList.add('formError');
 	}
 
 	// Making sure vms Email is valid
