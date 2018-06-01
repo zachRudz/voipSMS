@@ -176,7 +176,8 @@ function createUser() {
 		}
 		echo '</ul>';
 	} else {
-		echo "Added user successfully. <br />";
+		echo "<div class='alert alert-success'><strong>Success! </strong>
+			Added user successfully. </div>";
 
 		// -- Adding user's DIDs to the db --
 		// We need the user's user ID first though.	

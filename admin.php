@@ -72,69 +72,17 @@ function displayUsers() {
 	echo "</form>";
 	echo "</div>";
 }
+
+
+
+
+/**************************************************
+    Entry point
+*/
+require_once("pageTop.php");
+require_once("imports/datatables_css.php");
 ?>
-<!DOCTYPE html>
-<html>
-<head>
-    <meta charset="utf-8">
 	<title>voipSMS</title>
-	<link rel="stylesheet" type="text/css" href="css/main.css" />
-
-	<script src="//code.jquery.com/jquery-1.12.0.min.js"></script>
-	<script src="//cdn.datatables.net/1.10.13/js/jquery.dataTables.min.js"></script>
-	<link rel="stylesheet" type="text/css" href="//cdn.datatables.net/1.10.13/css/jquery.dataTables.min.css" />
-
-	<script>
-	// JQuery DataTable stuff
-	$(document).ready(function(){
-		$('#admin_userList').DataTable({
-			"pageLength": 25
-		});
-	});
-
-	// Make sure form is filled completely and such.                           
-	function validateDeleteUsers() {                                        
-		var errors = [];                                                       
-		var form = document.forms['deleteUsers'];                           
-		var errorMessage = document.getElementById('formErrorMessage');        
-		
-		// Clear error classes from inputs                                     
-		errorMessage.classList.remove('error');                                
-		
-		// Clear the error div                                                 
-		errorMessage.innerHTML = "";                                           
-		
-		// -- Begin processing form --                                         
-		// Making sure something's checked                                     
-		var i = 0;                                                             
-		for(i = 0; i < form['deletedUsers[]'].length; i++) {                      
-			if(form['deletedUsers[]'][i].checked) {                               
-				var notEmpty = true;                                           
-			}                                                                  
-		}                                                                      
-			
-		if(!notEmpty) {                                                        
-			errors.push("No users selected.");                              
-		}                                                                      
-			
-		// -- Writing errors --                                                
-		var numErrors = errors.length;                                         
-		if(numErrors > 0) {                                                    
-			// Loop though errors and write them to the error message div      
-			errorMessage.innerHTML = "Errors found while processing the form:";
-			
-			for(var i = 0; i < numErrors; i++) {                               
-				errorMessage.innerHTML += "<br />";                                
-				errorMessage.innerHTML += errors[i];                               
-			}                                                                  
-			
-			errorMessage.classList.add('error');                               
-			return false;                                                      
-		}                                                                      
-	
-		return true;                                                           
-	}                                                                          
-	</script>
 
 </head>
 <body>
@@ -144,11 +92,13 @@ function displayUsers() {
 
 	// Making sure we're logged in
 	if(!isset($_SESSION['auth'])) {
-		echo "<div class='error'>Error: You must be logged in to visit this page.</div>";
+		echo "<div class='alert alert-danger'><strong>Error: </strong>
+			You must be logged in to visit this page.</div>";
 	} else {
 		// Making sure we're an admin
 		if(!isAdmin($_SESSION['auth_info']['userID'])) {
-			echo "<div class='error'>Error: You must be an admin to visit this page.</div>";
+			echo "<div class='alert alert-danger'><strong>Error: </strong>
+				You must be an admin to visit this page.</div>";
 		} else {
 			/**************************************************
 				Admin page
@@ -160,7 +110,8 @@ function displayUsers() {
 			if($_SERVER['REQUEST_METHOD'] == "POST") {
 				// Test if there's some users to delete
 				if(!isset($_POST['deletedUsers'])) {
-					echo "<div class='error'>Error: No users selected for deletion.</div>";
+					echo "<div class='alert alert-danger'><strong>Error: </strong>
+						No users selected for deletion.</div>";
 				} else {
 					// Loop through users and delete them (and all of their dids/contacts).
 					deleteUsers($_POST['deletedUsers']);
@@ -173,4 +124,58 @@ function displayUsers() {
 	}
 ?>
 </body>
+<?php require_once("pageBottom.php"); ?>
+<?php require_once("imports/datatables.php"); ?>
+
+<script>
+// JQuery DataTable stuff
+$(document).ready(function(){
+	$('#admin_userList').DataTable({
+		"pageLength": 25
+	});
+});
+
+// Make sure form is filled completely and such.                           
+function validateDeleteUsers() {                                        
+	var errors = [];                                                       
+	var form = document.forms['deleteUsers'];                           
+	var errorMessage = document.getElementById('formErrorMessage');        
+	
+	// Clear error classes from inputs                                     
+	errorMessage.classList.remove('error');                                
+	
+	// Clear the error div                                                 
+	errorMessage.innerHTML = "";                                           
+	
+	// -- Begin processing form --                                         
+	// Making sure something's checked                                     
+	var i = 0;                                                             
+	for(i = 0; i < form['deletedUsers[]'].length; i++) {                      
+		if(form['deletedUsers[]'][i].checked) {                               
+			var notEmpty = true;                                           
+		}                                                                  
+	}                                                                      
+		
+	if(!notEmpty) {                                                        
+		errors.push("No users selected.");                              
+	}                                                                      
+		
+	// -- Writing errors --                                                
+	var numErrors = errors.length;                                         
+	if(numErrors > 0) {                                                    
+		// Loop though errors and write them to the error message div      
+		errorMessage.innerHTML = "Errors found while processing the form:";
+		
+		for(var i = 0; i < numErrors; i++) {                               
+			errorMessage.innerHTML += "<br />";                                
+			errorMessage.innerHTML += errors[i];                               
+		}                                                                  
+		
+		errorMessage.classList.add('error');                               
+		return false;                                                      
+	}                                                                      
+
+	return true;                                                           
+}                                                                          
+</script>
 </html>

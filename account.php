@@ -29,6 +29,9 @@ function displayAccountForm($userID) {
 		echo "<div class='alert alert-danger'><strong>Error:</strong> No user found with that ID.</div>";
 		return;
 	}
+
+	// A place for all the errors 
+	echo "<div id='formErrorMessage'></div>";
 	
 	// Begin printing the update user info form
 	echo "
@@ -73,16 +76,44 @@ function displayAccountForm($userID) {
 	</form>
 	</div>";
 
-	echo "<div id='formErrorMessage'></div>";
-
 	// Begin printing syncDIDs form
 	echo "
 	<div class='container-fluid rounded border border-primary'>
 	<h1 class='h3 my-3 font-weight-normal'>Sync DIDs with VoIP.MS</h3>
-	<form action='account.php' method='POST'
-		name='accountChange' onsubmit='return validateAccountChange()'>
-
+	<form action='account.php' method='POST' name='syncDids'>
 		<input type='submit' name='submit' value='Sync DIDs' />
+	</form>
+	</div>";
+
+	// Begin printing delete account
+	echo "
+	<div class='container-fluid rounded border border-primary'>
+	<h1 class='h3 my-3 font-weight-normal'>Delete account</h3>
+	<div>To delete your account, enter your current password.</div>
+	<div class='alert alert-warning'><strong>Warning!</strong> 
+		This action cannot be undone!</div>
+
+	<form action='account.php' method='POST'
+		name='accountDelete' onsubmit='return validateAccountDelete()'>
+
+		<div class='form-group'>
+			<div class='row'>
+				<label class='col-sm-2 col-form-label' for='passwordInput'>Password</label>
+				<div class='col-sm-10'>
+					<input type='password' class='form-control' id='passwordInput' 
+						placeholder='Confirm Current Password' name='password' />
+				</div>
+			</div>
+			<div class='form-check'>
+				<input type='checkbox' class='form-check-input' id='accountDeleteCheck' 
+					value='confirm' name='accountDeleteCheck' /> 
+				<label class='form-check-label' for='accountDeleteCheck'>
+					I confirm that I want to delete my account
+				</label>
+			</div>
+		</div>
+
+		<input type='submit' name='submit' value='Delete Account' />
 	</form>
 	</div>";
 }
@@ -150,6 +181,37 @@ function processAccountChanges() {
 	}
 }
 
+/**************************************************
+	Process Account Deletion
+
+	Processes the form from displayAccountForm()
+*/
+function processAccountDeletion() {
+	// Make sure that the user confirmed that they want to delete their account
+	if(isset($_POST['password']) 
+		&& isset($_POST['accountDeleteCheck'])) {
+
+		// User filled out the form. Make sure that they've entered the correct password.
+		$user = getUser($_SESSION['auth_info']['userID']);
+		if(getUserFromLogin($user['vms_email'], $_POST['password']) != false) {
+			
+			// User has confirmed that they want to delete their account.
+			return deleteUser($_SESSION['auth_info']['userID']);
+			
+		// User didn't enter their password correctly
+		} else {
+			echo "<div class='alert alert-danger'><strong>Error: </strong>
+				Password not correct. Not deleting account.</div>";
+			return false;
+		}
+
+	// User didn't complete the form (ie: password and checkbox)
+	} else {
+		echo "<div class='alert alert-danger'><strong>Error: </strong>
+			Unable to delete account, because not all of the form was filled out.</div>";
+		return false;
+	}
+}
 
 
 /**************************************************
@@ -191,6 +253,7 @@ require_once("pageTop.php");
 					 (Reason: {$res['status']})</div>";
 				}
 
+
 			// Syncing DIDs.	
 			} else if($_POST['submit'] == 'Sync DIDs') {
 				if(syncUserDIDs($_SESSION['auth_info']['userID'])) {
@@ -205,9 +268,33 @@ require_once("pageTop.php");
 						Unable to sync DIDs</div>";
 				}
 
+
+			// Deleting account
+			} else if($_POST['submit'] == 'Delete Account') {
+				// Process the account deletion. 
+				// If it worked, display the success message, and be done with it. 
+				// Otherwise, show the error message, and go back to the account form.
+				if(processAccountDeletion()) {
+				
+					// Delete the user's session
+					session_destroy();
+					
+					// Let the user know it worked, and send them home.
+					echo "<div class='alert alert-success'><strong>Success! </strong>
+						Your account has been deleted.
+						<a href='index.php' class='alert-link'>Back home</a></div>";
+					return;
+
+				// Something's gone wrong with the account deletion.
+				} else {
+					echo "<div class='alert alert-danger'><strong>Error: </strong>
+						Something went wrong when trying to delete your account.</div>";
+				}
+
+
+			// Unexpected form recieved. User isn't editing account info, syncing DIDs, or deleting their acc.
+			// They're probably misusing with the forms.
 			} else {
-				// User isn't updating their passwords, or syncing their dids.
-				// They're probably misusing with the forms.
 				echo "<div class='alert alert-danger'><strong>Error:</strong>
 					Unexpected form submission recieved.</div>";
 			}
@@ -266,6 +353,44 @@ function validateAccountChange() {
 	}
 	
 	
+	// -- Writing errors --
+	var numErrors = errors.length;
+	if(numErrors > 0) {
+		// Loop though errors and write them to the error message div
+		errorMessage.innerHTML = "Errors found while processing the form:";
+		
+		for(var i = 0; i < numErrors; i++) {
+			errorMessage.innerHTML += "<br />";
+			errorMessage.innerHTML += errors[i];
+		}
+		
+		errorMessage.classList.add('alert');
+		errorMessage.classList.add('alert-danger');
+		return false;
+	}
+	
+	return true; 
+}
+
+// Make sure the user is prepared to delete their account
+function validateAccountDelete() {
+	var errors = [];
+	var form = document.forms['accountDelete'];
+	var errorMessage = document.getElementById('formErrorMessage');
+	
+	// Clear error classes from inputs
+	errorMessage.classList.remove('alert');
+	errorMessage.classList.remove('alert-danger');
+	
+	// Clear the error div
+	errorMessage.innerHTML = "";
+	
+	// -- Begin processing form --
+	// Password is too short
+	if(form['password'].value == "") {
+		errors.push("No password entered!");
+	}
+
 	// -- Writing errors --
 	var numErrors = errors.length;
 	if(numErrors > 0) {

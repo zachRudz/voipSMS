@@ -19,6 +19,7 @@ require_once('dbinfo.php');
 	getUser()
 	getUserFromLogin()
 	alterUser()
+	deleteUser()
 
 	-- Contacts --
 	getContact()
@@ -347,6 +348,46 @@ function alterUser($userID, $vms_apiPassword, $userPassword, $currentPassword) {
 }
 
 /**************************************************
+	Delete user (single)
+
+	Given a user ID, delete them
+
+	This means deleting all of their contacts, DIDs, and then the user itsself.
+*/
+function deleteUser($userID) {
+	try {
+		$db = connectToDB();                                                 
+
+		// Deleting all of the user's contacts
+		$deleteContactQuery = "DELETE FROM contacts WHERE ownerID = :userID";
+		$deleteContact_stmt = $db->prepare($deleteContactQuery );
+		$deleteContact_stmt->bindValue(":userID", $userID);     
+		$deleteContact_stmt->execute();
+
+		// Clear the default DID of the user
+		clearDefaultDID($userID);
+
+		// Deleting all of the user's dids
+		$deleteDidsQuery = "DELETE FROM dids WHERE ownerID = :userID";
+		$deleteDids_stmt = $db->prepare($deleteDidsQuery );
+		$deleteDids_stmt ->bindValue(":userID", $userID);     
+		$deleteDids_stmt ->execute();
+
+		// Deleting the user
+		$deleteUserQuery = "DELETE FROM users WHERE userID = :userID";
+		$deleteUser_stmt = $db->prepare($deleteUserQuery );
+		$deleteUser_stmt ->bindValue(":userID", $userID);     
+		$deleteUser_stmt ->execute();
+
+		return true;
+	} catch(Exception $e) {
+		echo "<div class='error'>Exception caught while deleting a contact: ";
+		echo $e->getMessage() . "</div>";
+		return False;
+	}
+}
+
+/**************************************************
 	Get user from email/password
 
 	Returns the user's ID, email and base64 encoded API password
@@ -357,7 +398,7 @@ function getUserFromLogin($vms_email, $vms_password) {
 		$db = connectToDB();                                                 
 
 		// Validating user login against db                                  
-		$stmt = $db->prepare("SELECT userID, didID_default
+		$stmt = $db->prepare("SELECT userID, vms_email, didID_default 
 		FROM users WHERE                                                 
 		vms_email=:vms_email AND userPassword=SHA2(:userPassword,256)"); 
 		
@@ -525,36 +566,48 @@ function isAdmin($userID) {
 }
 
 /**************************************************
-	Delete users
+	Delete users (multiple)
 
 	Given an array of users to delete, loop through and delete them all.
 
 	This means deleting all of their contacts, DIDs, and then the user itsself.
 */
-function deleteUsers($userIDs) {
+function deleteUsers($userID_array) {
 	try {
-		// Looping through each user
-		foreach($userIDs as $uid) {
-			$db = connectToDB();                                                 
+		$db = connectToDB();                                                 
 
+		// Query for deleting contacts for a user
+		$deleteContactQuery = "DELETE FROM contacts WHERE ownerID = :uid";
+		$deleteContact_stmt = $db->prepare($deleteContactQuery );
+
+		// Query for deleting DIDs for a user
+		$deleteDidsQuery = "DELETE FROM dids WHERE ownerID = :uid";
+		$deleteDids_stmt = $db->prepare($deleteDidsQuery );
+
+		// Query for deleting user
+		$deleteUserQuery = "DELETE FROM users WHERE userID = :uid";
+		$deleteUser_stmt = $db->prepare($deleteUserQuery );
+
+
+		// Looping through each user
+		foreach($userID_array as $uid) {
 			// Deleting all of the user's contacts
-			$query = "DELETE FROM contacts WHERE ownerID = :uid";
-			$select_stmt = $db->prepare($query);
-			$select_stmt->bindValue(":uid", $uid);     
-			$select_stmt->execute();
+			$deleteContact_stmt->bindValue(":uid", $uid);     
+			$deleteContact_stmt->execute();
+
+			// Clear the default DID of the user
+			clearDefaultDID($uid);
 
 			// Deleting all of the user's dids
-			$query = "DELETE FROM dids WHERE ownerID = :uid";
-			$select_stmt = $db->prepare($query);
-			$select_stmt->bindValue(":uid", $uid);     
-			$select_stmt->execute();
+			$deleteDids_stmt ->bindValue(":uid", $uid);     
+			$deleteDids_stmt ->execute();
 
 			// Deleting the user
-			$query = "DELETE FROM users WHERE userID = :uid";
-			$select_stmt = $db->prepare($query);
-			$select_stmt->bindValue(":uid", $uid);     
-			$select_stmt->execute();
+			$deleteUser_stmt ->bindValue(":uid", $uid);     
+			$deleteUser_stmt ->execute();
 		}
+
+		return true;
 	} catch(Exception $e) {
 		echo "<div class='error'>Exception caught while deleting a contact: ";
 		echo $e->getMessage() . "</div>";
