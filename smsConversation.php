@@ -108,14 +108,14 @@ function getConversation($userID, $from, $to, $did, $contact, $limit) {
 
 
 	// Setting defaults if things aren't supplied
+	if(trim($from) == "") {
+		$from = Date("Y-m-d", strtotime("-1 months"));
+	}
 	if(trim($to) == "") {
 		$to = Date('Y-m-d');
 	}
-	if(trim($from) == "") {
-		$from = Date('Y-m-d');
-	}
 	if(trim($limit) == "") {
-		$limit = "25";
+		$limit = "100";
 	}
 
 	// Making the SMS call

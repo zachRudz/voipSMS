@@ -42,9 +42,16 @@ function deleteUserDIDS($ownerID) {
 	// Getting all DIDs for this user
 	try {
 		$db = connectToDB();
+
+		// Nulling out the reference to the owner's default DID
+		$query = "UPDATE users SET didID_default = NULL where userID = :ownerID";
+		$select_stmt = $db->prepare($query);
+		$select_stmt->bindValue(":ownerID", $ownerID);
+		$select_stmt->execute();
 		
 		// Getting all of the contacts for this user
-		$select_stmt = $db->prepare("DELETE FROM `dids` WHERE ownerID = :ownerID");
+		$query = "DELETE FROM `dids` WHERE ownerID = :ownerID";
+		$select_stmt = $db->prepare($query);
 		$select_stmt->bindValue(":ownerID", $ownerID);
 		$select_stmt->execute();
 	} catch(Exception $e) {
@@ -258,8 +265,9 @@ function getUser($userID) {
 	try {
 		$db = connectToDB();
 		
-		// Getting all of the contacts for this user
-		$query = "SELECT * FROM `users` WHERE userID = :userID";
+		// Getting the user's information given their ID
+		$query = "SELECT * FROM `users` LEFT JOIN dids ON didID_default = didID" . 
+			" WHERE userID = :userID";
 
 		$select_stmt = $db->prepare($query);
 		$select_stmt->bindValue(":userID", $userID);
