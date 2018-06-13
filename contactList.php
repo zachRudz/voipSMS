@@ -160,5 +160,4 @@ require_once("imports/datatables_css.php");
 		return true;
 	}
 </script>
-<?php require_once("pageBottom.php"); ?>
 </html>
