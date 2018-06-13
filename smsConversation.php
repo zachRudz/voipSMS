@@ -30,7 +30,7 @@ require_once("sql/dbQueries.php");
 function displaySMSConversationSearchForm($target) {
     echo "
     <div class='container-fluid rounded border border-primary'>
-    <h1 class='h3 my-3 font-weight-normal'>Filter this conversation</h3>
+    <h1 class='h3 my-3 font-weight-normal'>Filter this conversation</h1>
 
     <form action='sms.php' method='get'
         name='conversationFilter' onsubmit='return validateConversationFilter()'>
@@ -144,15 +144,17 @@ function getConversation($userID, $from, $to, $did, $contact, $limit) {
 	spicey neato HTML
 */
 function displayConversationHistory($conversation) {
-	echo "<div id='conversation'>";
+	echo "<div id='conversation' class='container-fluid rounded border border-primary'>";
 
 	// Making sure that there's actually some SMS messages to parse
 	if($conversation['status'] == "no_sms") {
-		echo "No messages found; Did you search for a broad enough time window?";
+		echo "<div class='alert alert-danger'><strong>Error:</strong>
+			No messages found; Did you search for a broad enough time window?</div>";
 		echo "</div>";
 		return;
 	} else if($conversation['status'] != "success") {
-		echo "Something went wrong (Reason: {$conversation['status']})";
+		echo "<div class='alert alert-danger'><strong>Error:</strong>
+			Something went wrong (Reason: {$conversation['status']})</div>";
 		echo "</div>";
 		return;
 	}
@@ -166,18 +168,22 @@ function displayConversationHistory($conversation) {
 		$sms = $conversation['sms'][$index];
 
 		// Different CSS for recieved/sent messages
+		echo "<div class='sms row my-1'>";
 		if($sms['type'] == 1) {
-			echo "<div class='sms recieved'>";
+			echo "<div class='recieved col-md-8
+				bg-info'>";
 		} else {
-			echo "<div class='sms sent'>";
+			echo "<div class='sent col-md-8 offset-md-4
+				bg-secondary'>";
 		}
 
-		echo "<div class='smsPayload'>";
-		echo htmlspecialchars($sms['message']);
-		echo "</div>";
+		echo "	<div class='smsPayload'>";
+		echo		htmlspecialchars($sms['message']);
+		echo "	</div>";
 
-		echo "<div class='smsDate'>";
-		echo $sms['date'];
+		echo "	<div class='smsDate'>";
+		echo		$sms['date'];
+		echo "	</div>";
 		echo "</div>";
 
 		echo "</div>";
@@ -337,20 +343,24 @@ function displayContactPane($userID, $currentContact) {
 	Display Send SMS Form
 */
 function displaySendSMSForm($target) {
-	echo '<div div="sendSMS">';
-	echo '<div class="formWrapper">';
-	echo "	<form action='sms.php?target={$target}' method='post' ";
-	echo '		name="sendSMS" onsubmit="return validateSendSMS()">';
-		// Used for js client-side validation
-		echo "<input type='hidden' name='target' value='{$target}' />";
+	echo "
+    <div id='didOptionsContainer' class='container-fluid rounded border border-primary'>
+		<h1 class='h4 font-weight-normal'>
+			Send a message to ${target} from " . $_SESSION['auth_info']['activeDID'] . "
+		</h1>
+		<form action='sms.php' method='post'
+			name='sendSMS' onsubmit='return validateSendSMS()'>
+			<input type='hidden' name='target' value='{$target}' />
+			
+			<textarea id='sendSMS' class='form-control' name='message' maxlength='160' 
+				required placeholder='Send an SMS...'></textarea>
+			<input type='submit' name='send' value='Send' />
+			</div>
+		</form>
+		</div>
+	</div>";
 
-		echo '<textarea id="sendSMS" name="message" maxlength="160" required ';
-		echo 'placeholder="Send an SMS..."></textarea>';
-		echo "<input type='submit' name='send' value='Send' />";
-		echo "<span id='formErrorMessage_sendSMS'></span>";
-	echo '	</form>';
-	echo '</div>';
-	echo '</div>';
+	echo "<div id='formErrorMessage_sendSMS'></div>";
 }
 
 
