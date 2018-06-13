@@ -213,7 +213,6 @@ require_once("imports/datatables_css.php");
 			"pageLength": 25
 		});
 	});
-
 	/**************************************************
 	 Spicey scriptaroonie to jump to the bottom of the webpage when the page loads
 

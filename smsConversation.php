@@ -30,10 +30,10 @@ require_once("sql/dbQueries.php");
 function displaySMSConversationSearchForm($target) {
     echo "
     <div class='container-fluid rounded border border-primary'>
-    <h1 class='h3 my-3 font-weight-normal'>Filter this conversation</h1>
+    <h1 class='h3 my-3 font-weight-normal'>Filter this conversation</h3>
 
     <form action='sms.php' method='get'
-        name='conversationFilter' onsubmit='return validateConversationFilter()'>
+        name='conversationFilter' onsubmit='return validateConversationFilter()()'>
         
 		<div class='row'>
             <label class='col-md-3 col-form-label' for='fromInput'>Date</label>
