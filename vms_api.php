@@ -194,6 +194,9 @@ function syncUserDIDs($userID) {
 			(Reason: {$dids['status']}) </div>";
 		return False;
 	}
+
+	// Clears the user's default DID
+	clearDefaultDID($userID);
 	
 	// Clears all of the DIDS for this user
 	deleteUserDIDS($userID);

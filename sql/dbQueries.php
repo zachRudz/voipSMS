@@ -8,17 +8,22 @@ require_once('dbinfo.php');
 
 	-- User DIDs --
 	deleteUserDIDS()
+	getDIDFromValue()
+	getDIDFromID()
 	getDIDs()
+	clearDefaultDID()
+	setDefaultDID()
 
 	-- Users --
 	getUserAPICredentials()
 	getUser()
 	getUserFromLogin()
 	alterUser()
-	setDefaultDID()
+	deleteUser()
 
 	-- Contacts --
 	getContact()
+	getContacts()
 	updateContact()
 	deleteContact()
 	addContact()
@@ -55,6 +60,68 @@ function deleteUserDIDS($ownerID) {
 }
 
 /**************************************************
+	Get DID From Value
+
+	Returns the DID with phone number = $did.
+	Returns false if the DID doesn't exist.
+*/
+function getDIDFromValue($didValue) {
+	$db = connectToDB();
+
+	// Getting all DIDs for this user
+	try {
+		$db = connectToDB();
+		
+		// Getting all of the contacts for this user
+		$select_stmt = $db->prepare("SELECT * FROM `dids` WHERE did = :did");
+		$select_stmt->bindValue(":did", $didValue);
+		$select_stmt->execute();
+		
+		// Grab all the data
+		$res = $select_stmt->fetchAll(PDO::FETCH_ASSOC); 
+
+		// Validate
+		if(count($res) != 1)
+			return False;
+
+		return $res[0];
+	} catch(Exception $e) {
+		echo "<div class='error'>Exception caught: " . $e->getMessage() . "</div>";
+	}
+}
+
+/**************************************************
+	Get DID From ID
+
+	Returns the DID with ID = $didID.
+	Returns false if the DID doesn't exist.
+*/
+function getDIDFromID($didID) {
+	$db = connectToDB();
+
+	// Getting all DIDs for this user
+	try {
+		$db = connectToDB();
+		
+		// Getting all of the contacts for this user
+		$select_stmt = $db->prepare("SELECT * FROM `dids` WHERE didID = :didID");
+		$select_stmt->bindValue(":didID", $didID);
+		$select_stmt->execute();
+		
+		// Grab all the data
+		$res = $select_stmt->fetchAll(PDO::FETCH_ASSOC); 
+
+		// Validate
+		if(count($res) != 1)
+			return False;
+
+		return $res[0];
+	} catch(Exception $e) {
+		echo "<div class='error'>Exception caught: " . $e->getMessage() . "</div>";
+	}
+}
+
+/**************************************************
 	Get user DIDs
 
 	Returns an array of user DIDs
@@ -79,6 +146,87 @@ function getDIDs($userID) {
 		echo "<div class='error'>Exception caught: " . $e->getMessage() . "</div>";
 	}
 }
+
+/**************************************************
+	Clear Default DID
+
+	Removes the default DID for a user (ie: Sets it to null).
+	Returns True if it was successful, and false otherwise.
+*/
+function clearDefaultDID($userID) {
+	// Making sure the user exists
+	$user = getUser($userID);
+	if($user == False) {
+		echo "<div class='error'>Error: That user doesn't exist.</div>";
+		return False;
+	} 
+
+	// Begin altering the table entry
+	try {
+		$db = connectToDB();                                                 
+
+		// Updating default DID for the user
+		$query = "UPDATE users SET didID_default = null
+			WHERE userID = :userID";
+	
+		$stmt = $db->prepare($query);
+		$stmt->bindValue(":userID", $userID);     
+
+		$stmt->execute();
+		return True;
+	} catch(Exception $e) {
+		echo "<div class='error'>Exception caught: " . $e->getMessage() . "</div>";
+		return False;
+	}
+}
+
+/**************************************************
+	Update Default DID
+
+	Updates the default DID for a user.
+	Returns true if successful, and false if the DID doesn't belong to the user.
+*/
+function setDefaultDID($userID, $didValue) {
+	// Making sure the user exists
+	$user = getUser($userID);
+	if($user == False) {
+		echo "<div class='error'>Error: That user doesn't exist.</div>";
+		return False;
+	} 
+
+	// Making sure the DID exists
+	$did = getDIDFromValue($didValue);
+	if($did == False && $did != null) {
+		echo "<div class='error'>Error: That DID doesn't exist (didID: " . $didValue. ").</div>";
+		return False;
+	} 
+
+	// Making sure the user owns the DID
+	if($did['ownerID'] != $user['userID']) {
+		echo "<div class='error'>Error: That user doesn't own that DID.</div>";
+		return False;
+	}
+
+	// Begin altering the table entry
+	try {
+		$db = connectToDB();                                                 
+
+		// Updating default DID for the user
+		$query = "UPDATE users SET didID_default = :didID
+			WHERE userID = :userID";
+	
+		$stmt = $db->prepare($query);
+		$stmt->bindValue(":didID", $did['didID']);     
+		$stmt->bindValue(":userID", $userID);     
+
+		$stmt->execute();
+		return True;
+	} catch(Exception $e) {
+		echo "<div class='error'>Exception caught: " . $e->getMessage() . "</div>";
+		return False;
+	}
+}
+
 
 /**************************************************
 	Get user API Credentials
@@ -144,7 +292,7 @@ function getUser($userID) {
 	Changes the values of an existing user.
 	If a value is null, don't change it.
 */
-function alterUser($userID, $name, $vms_apiPassword, $userPassword, $currentPassword) {
+function alterUser($userID, $vms_apiPassword, $userPassword, $currentPassword) {
 	// Making sure the user exists
 	$user = getUser($userID);
 	if($user == False) {
@@ -152,14 +300,7 @@ function alterUser($userID, $name, $vms_apiPassword, $userPassword, $currentPass
 		return False;
 	}
 
-	// Testing if name is null. If so, don't change it 
-	if(trim($name) == "") {
-		$new_name = $user['name'];
-	} else {
-		$new_name = $name;
-	}
-
-	// Testing if name is null. If so, don't change it 
+	// Testing if api password is null. If so, don't change it 
 	if(trim($vms_apiPassword) == "") {
 		$new_vms_apiPassword = $user['vms_apiPassword'];
 	} else {
@@ -189,24 +330,20 @@ function alterUser($userID, $name, $vms_apiPassword, $userPassword, $currentPass
 		// Begin updating the contact
 		if($passwordChange) {
 			// User is changing their password
-			$query = "UPDATE users SET name = :name,
-				vms_apiPassword = :vms_apiPassword,
+			$query = "UPDATE users SET vms_apiPassword = :vms_apiPassword,
 				userPassword = SHA2(:userPassword,256)
 				WHERE userID = :userID";
 	
 			$stmt = $db->prepare($query);
-			$stmt->bindValue(":name", trim($new_name));     
 			$stmt->bindValue(":vms_apiPassword", trim($new_vms_apiPassword));     
 			$stmt->bindValue(":userPassword", trim($userPassword));     
 			$stmt->bindValue(":userID", $userID);     
 		} else {
 			// User isn't changing their password, or they failed to authenticate their password
-			$query = "UPDATE users SET name = :name,
-				vms_apiPassword = :vms_apiPassword
+			$query = "UPDATE users SET vms_apiPassword = :vms_apiPassword
 				WHERE userID = :userID";
 	
 			$stmt = $db->prepare($query);
-			$stmt->bindValue(":name", trim($new_name));     
 			$stmt->bindValue(":vms_apiPassword", trim($new_vms_apiPassword));     
 			$stmt->bindValue(":userID", $userID);     
 		}
@@ -220,45 +357,41 @@ function alterUser($userID, $name, $vms_apiPassword, $userPassword, $currentPass
 }
 
 /**************************************************
-	Set user's default DID
+	Delete user (single)
 
-	Changes the values of an existing user.
-	If a value is null, don't change it.
+	Given a user ID, delete them
+
+	This means deleting all of their contacts, DIDs, and then the user itsself.
 */
-function setDefaultDID($userID, $newDefaultDID) {
-	// Making sure the user exists
-	$user = getUser($userID);
-	if($user == False) {
-		echo "<div class='error'>Cannot change user password (current password incorrect)</div>";
-		return False;
-	}
-
-	// Fetching the new DID from the dids table. Setting it to null if we can't find it.
-	$dids = getDIDs($userID);
-	$didID = null;
-	foreach($dids as $d) {
-		if($d['did'] == $newDefaultDID) {
-			$didID = $d['didID'];
-		}
-	}
-
-	// Begin altering the table entry
+function deleteUser($userID) {
 	try {
 		$db = connectToDB();                                                 
 
-		// Begin updating the contact's default DID
-		$query = "UPDATE users SET didID_default = :didID " .
-			"WHERE userID = :userID";
-	
-		// Preparing the query
-		$stmt = $db->prepare($query);
-		$stmt->bindValue(":didID", $didID);     
-		$stmt->bindValue(":userID", $userID);     
+		// Deleting all of the user's contacts
+		$deleteContactQuery = "DELETE FROM contacts WHERE ownerID = :userID";
+		$deleteContact_stmt = $db->prepare($deleteContactQuery );
+		$deleteContact_stmt->bindValue(":userID", $userID);     
+		$deleteContact_stmt->execute();
 
-		$stmt->execute();
-		return True;
+		// Clear the default DID of the user
+		clearDefaultDID($userID);
+
+		// Deleting all of the user's dids
+		$deleteDidsQuery = "DELETE FROM dids WHERE ownerID = :userID";
+		$deleteDids_stmt = $db->prepare($deleteDidsQuery );
+		$deleteDids_stmt ->bindValue(":userID", $userID);     
+		$deleteDids_stmt ->execute();
+
+		// Deleting the user
+		$deleteUserQuery = "DELETE FROM users WHERE userID = :userID";
+		$deleteUser_stmt = $db->prepare($deleteUserQuery );
+		$deleteUser_stmt ->bindValue(":userID", $userID);     
+		$deleteUser_stmt ->execute();
+
+		return true;
 	} catch(Exception $e) {
-		echo "<div class='error'>Exception caught: " . $e->getMessage() . "</div>";
+		echo "<div class='error'>Exception caught while deleting a contact: ";
+		echo $e->getMessage() . "</div>";
 		return False;
 	}
 }
@@ -274,10 +407,9 @@ function getUserFromLogin($vms_email, $vms_password) {
 		$db = connectToDB();                                                 
 
 		// Validating user login against db                                  
-		$stmt = $db->prepare("SELECT userID, name, did as default_did ".
-			"FROM users " .
-			"LEFT JOIN dids ON didID_default = didID " .
-			"WHERE vms_email=:vms_email AND userPassword=SHA2(:userPassword,256)"); 
+		$stmt = $db->prepare("SELECT userID, vms_email, didID_default 
+		FROM users WHERE                                                 
+		vms_email=:vms_email AND userPassword=SHA2(:userPassword,256)"); 
 		
 		$stmt->bindValue(":vms_email", trim($vms_email));           
 		$stmt->bindValue(":userPassword", trim($vms_password));     
@@ -332,6 +464,34 @@ function getContact($userID, $contactID) {
 		}
 	} catch(Exception $e) {
 		echo "<div class='error'>Exception caught: " . $e->getMessage() . "</div>";
+		return False;
+	}
+}
+
+/**************************************************
+	Get Contacts
+
+	Returns all of the contacts for the user
+
+	Returns false if something went wrong.
+*/
+function getContacts($userID) {
+	// Getting all DIDs for this user
+	try {
+		$db = connectToDB();                                                 
+
+		// Validating user login against db                                  
+		// Getting all of the contacts for this user                                    
+		$query = "SELECT * FROM contacts WHERE ownerID = :ownerID";
+		$select_stmt = $db->prepare($query);
+		$select_stmt->bindValue(":ownerID", $userID);     
+		$select_stmt->execute();
+
+		// Checking if we've got a match                                     
+		$userData = $select_stmt->fetchAll(PDO::FETCH_ASSOC);                   
+		return $userData;
+	} catch(Exception $e) {
+		echo "<div class='alert alert-danger'>Exception caught: " . $e->getMessage() . "</div>";
 		return False;
 	}
 }
@@ -443,36 +603,48 @@ function isAdmin($userID) {
 }
 
 /**************************************************
-	Delete users
+	Delete users (multiple)
 
 	Given an array of users to delete, loop through and delete them all.
 
 	This means deleting all of their contacts, DIDs, and then the user itsself.
 */
-function deleteUsers($userIDs) {
+function deleteUsers($userID_array) {
 	try {
-		// Looping through each user
-		foreach($userIDs as $uid) {
-			$db = connectToDB();                                                 
+		$db = connectToDB();                                                 
 
+		// Query for deleting contacts for a user
+		$deleteContactQuery = "DELETE FROM contacts WHERE ownerID = :uid";
+		$deleteContact_stmt = $db->prepare($deleteContactQuery );
+
+		// Query for deleting DIDs for a user
+		$deleteDidsQuery = "DELETE FROM dids WHERE ownerID = :uid";
+		$deleteDids_stmt = $db->prepare($deleteDidsQuery );
+
+		// Query for deleting user
+		$deleteUserQuery = "DELETE FROM users WHERE userID = :uid";
+		$deleteUser_stmt = $db->prepare($deleteUserQuery );
+
+
+		// Looping through each user
+		foreach($userID_array as $uid) {
 			// Deleting all of the user's contacts
-			$query = "DELETE FROM contacts WHERE ownerID = :uid";
-			$select_stmt = $db->prepare($query);
-			$select_stmt->bindValue(":uid", $uid);     
-			$select_stmt->execute();
+			$deleteContact_stmt->bindValue(":uid", $uid);     
+			$deleteContact_stmt->execute();
+
+			// Clear the default DID of the user
+			clearDefaultDID($uid);
 
 			// Deleting all of the user's dids
-			$query = "DELETE FROM dids WHERE ownerID = :uid";
-			$select_stmt = $db->prepare($query);
-			$select_stmt->bindValue(":uid", $uid);     
-			$select_stmt->execute();
+			$deleteDids_stmt ->bindValue(":uid", $uid);     
+			$deleteDids_stmt ->execute();
 
 			// Deleting the user
-			$query = "DELETE FROM users WHERE userID = :uid";
-			$select_stmt = $db->prepare($query);
-			$select_stmt->bindValue(":uid", $uid);     
-			$select_stmt->execute();
+			$deleteUser_stmt ->bindValue(":uid", $uid);     
+			$deleteUser_stmt ->execute();
 		}
+
+		return true;
 	} catch(Exception $e) {
 		echo "<div class='error'>Exception caught while deleting a contact: ";
 		echo $e->getMessage() . "</div>";

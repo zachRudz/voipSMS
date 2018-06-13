@@ -9,10 +9,26 @@ session_start();
 function printRegistrationForm() {
 	// Let the user know that they need to enable API access on their
 	//		voip.ms account before registering.
-	echo '<div class="warning">
-		Note: The VoIP.ms API is not enabled by default. You must enable API access
-		on your VoIP.ms account before registering. You can allow the 
-		API Access from within your account, by following these steps:
+	echo '<div class="alert alert-warning">
+		<div>
+			Note: The VoIP.ms API is not setup by default. Prior to registration, you must follow the below
+			steps to ensure that this website can interface with your VoIP.ms account.
+
+			<ol>		
+				<li>Enable API access</li>
+				<li>Whitelist the IP address of this server for API access</li>
+			</ol>
+		</div>
+		</div>';
+		
+
+		echo '
+		<div>Enabling VoIP.ms API Access</div>
+		<div>
+			You must enable API access
+			on your VoIP.ms account before registering. You can allow the 
+			API Access from within your account, by following these steps:
+		</div>
 
 		<ol>		
 			<li>Log-in to your VoIP.ms account</li>
@@ -20,31 +36,45 @@ function printRegistrationForm() {
 		    <li>Click on button [Enable/Disable API] to Enable / Disable 
 				the API Access</li>
 		</ol>
-	</div>';
 
-	echo '<div class="formWrapper">';
-	echo ' <form name="register" action="register.php" method="POST"';
-	echo '	onsubmit="return validateRegister()">';
-	echo '<h3>voipSMS Account Information</h3>';
-	echo '<label>Name </label>';
-	echo '<input name="name" />';
+		<div>Whitelisting the IP of this server</div>
+		In addition, you also have to whitelist the IP Address of this server ('. $_SERVER['SERVER_ADDR'] . ') for API access.
+		Alternatively, you can whitelist all IP Addresses (0.0.0.0).
+		<ol>		
+			<li>Log-in to your VoIP.ms account</li>
+			<li>Go to "Main Menu" -> "SOAP & REST/JSON API"</li>
+		    <li>Enter the IP Address you want to whitelist in the field labeled "Enable IP Address".</li>
+		    <li>Click "Save IP Addresses" to save the changes.</li>
+		</ol>
+	';
 
-	echo '<label>Password </label>';
-	echo '<input type="password" name="password" />';
+	// Registration form
+	echo ' <form name="register" action="register.php" method="POST" 
+		onsubmit="return validateRegister()">
 
-	echo '<label>Confirm password </label>';
-	echo '<input type="password" name="password2" />';
+	<h3>voip.ms Account Information</h3>
+	<div class="row">
+		<div class="col">
+			<label class="col-sm-10 col-form-label" for="inputEmail">voip.ms Email</label>
+			<input class="form-control" id="inputEmail" placeholder="Email address" name="vms_email" required />
+		</div>
+		<div class="col">
+			<label class="col-sm-10 col-form-label" for="inputAPIPassword">voip.ms API Password </label>
+			<input type="password" class="form-control" id="inputAPIPassword" placeholder="API Password" name="vms_apiPassword" required />
+		</div>
+	</div>
 
-	echo '<h3>voip.ms Account Information</h3>';
-	echo '<label>voip.ms Email </label>';
-	echo '<input name="vms_email" />';
+	<h3>voipSMS Account Information</h3>
+	<div class="row">
+		<div class="col">
+			<label for="password1">Password</label>
+			<input class="form-control" id="password1" placeholder="Password" type="password" name="password" required />
+			<input class="form-control" id="password2" placeholder="Confirm Password" type="password" name="password2" required />
+		</div>
+	</div>
 
-	echo '<label>voip.ms API Password </label>';
-	echo '<input type="password" name="vms_apiPassword" />';
-
-	echo '<input type="submit">';
-	echo '</form> ';
-	echo "</div>";
+	<button type="submit" class="btn btn-primary">Submit</button>
+	</form> ';
 }
 
 /**************************************************
@@ -63,11 +93,10 @@ function createUser() {
 	$errors = array();
 
 	// Making sure everything's set
-	if(isset($_POST['name']) &&
-	isset($_POST['password']) &&
-	isset($_POST['password2']) &&
-	isset($_POST['vms_email']) &&
-	isset($_POST['vms_apiPassword'])) { 
+	if(isset($_POST['password']) &&
+		isset($_POST['password2']) &&
+		isset($_POST['vms_email']) &&
+		isset($_POST['vms_apiPassword'])) { 
 		// Begin testing the actual contents of the form
 
 		// Making sure that the email isn't a duplicate
@@ -79,12 +108,6 @@ function createUser() {
 			$validated = False;
 			$errors[] = "A user with this email already exists.";
 		} 
-
-		// Testing if the username is long enough
-		if(strlen(trim($_POST['name'])) < 2) {
-			$validated = False;
-			$errors[] = "Name is too short (min 3 characters).";
-		}
 
 		// Testing if the passwords match
 		if($_POST['password'] != $_POST['password2']) {
@@ -135,12 +158,11 @@ function createUser() {
 	}
 	
 	// -- Adding user to db --
-	$add_stmt = $db->prepare("INSERT INTO `users` (`vms_email`, `vms_apiPassword`, `userPassword`, `name`) VALUES (:vms_email, :vms_apiPassword, SHA2(:userPassword,256), :name)");
+	$add_stmt = $db->prepare("INSERT INTO `users` (`vms_email`, `vms_apiPassword`, `userPassword`) VALUES (:vms_email, :vms_apiPassword, SHA2(:userPassword,256))");
 	
 	$add_stmt->bindValue(":vms_email", trim($_POST['vms_email']));
 	$add_stmt->bindValue(":vms_apiPassword", base64_encode(trim($_POST['vms_apiPassword'])));
 	$add_stmt->bindValue(":userPassword", trim($_POST['password']));
-	$add_stmt->bindValue(":name", trim($_POST['name']));
 	$add_stmt->execute();
 
 	if($add_stmt->rowCount() != 1) {
@@ -154,7 +176,8 @@ function createUser() {
 		}
 		echo '</ul>';
 	} else {
-		echo "Added user successfully. <br />";
+		echo "<div class='alert alert-success'><strong>Success! </strong>
+			Added user successfully. </div>";
 
 		// -- Adding user's DIDs to the db --
 		// We need the user's user ID first though.	
@@ -167,14 +190,37 @@ function createUser() {
 		syncUserDIDs($user[0]['userID']);
 	}
 }
+
+
+
+/**************************************************
+    Entry Point
+*/
+require_once("pageTop.php");
 ?>
 
-<!DOCTYPE html>
-<html>
-<head>
-<meta charset="utf-8">
-<link rel="stylesheet" type="text/css" href="css/main.css" />
-<title>voipSMS: Register</title>
+	<title>voipSMS: Register</title>
+
+</head>
+<body>
+<?php 
+	require_once('header.php');
+
+	// If the form was submitted, attempt to create a user.
+	// Otherwise, print the registration form 
+	if($_SERVER['REQUEST_METHOD'] === "POST") {
+		createUser();		
+	} else {
+		// Make sure that the user's not already logged in.
+		if(isset($_SESSION['auth'])) {
+			echo "<div class='alert alert-danger'><strong>Error:</strong> You can't register a user while you're logged in.</div>";
+		}  else {
+			printRegistrationForm();
+		}
+	}
+?>
+</body>
+<?php require_once("pageBottom.php"); ?> 
 
 <script>
 // Source: http://www.w3resource.com/javascript/form/email-validation.php
@@ -192,7 +238,6 @@ function validateRegister() {
 	var errorMessage = document.getElementById('formErrorMessage');
 
 	// Clear error classes from inputs
-	form['name'].classList.remove("formError");
 	form['password'].classList.remove("formError");
 	form['password2'].classList.remove("formError");
 	form['vms_email'].classList.remove("formError");
@@ -204,11 +249,6 @@ function validateRegister() {
 
 	// -- Begin processing form --
 	// Making sure values aren't empty
-	if(form['name'].value == "") {
-		errors.push("Name cannot be empty.");
-		form['name'].classList.add('formError');
-	}
-
 	if(form['password'].value == "") {
 		errors.push("Password cannot be empty.");
 		form['password'].classList.add('formError');
@@ -237,11 +277,6 @@ function validateRegister() {
 		form['password'].classList.add('formError');
 	}
 
-	if(form['name'].value.length < 2) {
-		errors.push("Name isn't long enough (Min 2 characters).");
-		form['name'].classList.add('formError');
-	}
-
 	// Making sure vms Email is valid
 	if(!validateEmail(form['vms_email'].value)) {
 		errors.push("VoIP.ms email isn't valid.");
@@ -267,26 +302,4 @@ function validateRegister() {
 	return true;
 }
 </script>
-
-</head>
-<body>
-<?php 
-	require_once('header.php');
-	echo "<div id='formErrorMessage'></div>";
-
-	// If the form was submitted, attempt to create a user.
-	// Otherwise, print the registration form 
-	if($_SERVER['REQUEST_METHOD'] === "POST") {
-		createUser();		
-	} else {
-		// Make sure that the user's not already logged in.
-		if(isset($_SESSION['auth'])) {
-			echo "<div class='error'>" .
-				"Error: You can't register a user while you're logged in.</div>";
-		}  else {
-			printRegistrationForm();
-		}
-	}
-?>
-</body>
 </html>

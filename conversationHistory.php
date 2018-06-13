@@ -19,15 +19,6 @@
 
 **************************************************/
 
-// Including jquery and datatables.
-// Just in case it's not already imported, import the scripts and CSS.
-?>
-<script src="//code.jquery.com/jquery-1.12.0.min.js"></script>
-<script src="//cdn.datatables.net/1.10.13/js/jquery.dataTables.min.js"></script>
-<link rel="stylesheet" type="text/css" href="//cdn.datatables.net/1.10.13/css/jquery.dataTables.min.css" />
-
-<script src="js/smsValidation.js"></script>
-<?php
 require_once('sql/dbinfo.php');
 require_once('sql/dbQueries.php');
 require_once('vms_api.php');
@@ -46,22 +37,35 @@ function displayConversationSearchForm() {
 	// Getting the list of the user's DIDs
 	$dids = getDIDs($_SESSION['auth_info']['userID']);
 
-	echo '<div class="formWrapper">';
-	echo '	<h3>Search for a Conversation</h3>';
-	echo '	<form action="sms.php" method="post" ';
-	echo '	name="conversationSearch" onsubmit="return validateConversationSearch()">';
-	echo '		<label>From </label>';
-	echo '		<input type="date" name="from" placeholder="yyyy-mm-dd" />';
+	echo "
+		<h1 class='h3 my-3 font-weight-normal'>Search for a Conversation</h3>
+		<form action='sms.php' method='post' 
+			name='conversationSearch' onsubmit='return validateConversationSearch()'>
 
-	echo '		<label>To</label>';
-	echo '		<input type="date" name="to" placeholder="yyyy-mm-dd" />';
+			<div class='row'>
+        	    <label class='col-md-3 col-form-label' for='fromInput'>Date</label>
+        	    <div class='col-md-2'>
+        	        <input type='date' class='form-control' id='fromInput' 
+        	            placeholder='yyyy-mm-dd' name='from' />
+        	    </div>
+        	    <span> to </span>
+        	    <div class='col-md-2'>
+        	        <input type='date' class='form-control' id='toInput' 
+        	            placeholder='yyyy-mm-dd' name='to' />
+        	    </div>
+        	</div>
+	";
 
 	// Printing all of the user's dids
-	echo '		<label>Your number</label>';
-	echo '		<select name="did">';
-	echo "		<option value='any'>Any</option>";
+	echo "
+			<div class='row'>
+        	    <label class='col-md-3 col-form-label' for='didInput'>Your number</label>
+        	    <div class='col-md-2'>
+        	        <select class='form-control' id='didInput' name='did'>
+						<option value='any'>Any</option>
+	";
 	foreach($dids as $d) {
-		echo "		<option value'={$d['did']}'";
+		echo "		<option value='{$d['did']}'";
 		
 		// Select the current DID if it's the active DID
 		if($d['did'] == $_SESSION['auth_info']['activeDID'])
@@ -70,17 +74,36 @@ function displayConversationSearchForm() {
 		echo ">{$d['did']}";
 		echo "</option>";
 	}
-	echo '		</select>';
+	echo "
+					</select>
+        	    </div>
+        	</div>
+	";
 
-	echo '		<label>Target Contact</label>';
-	echo '		<input type="number" name="contact" placeholder="Eg: 1231231234" />';
+	// Printing the target contact
+	echo "
+			<div class='row'>
+        	    <label class='col-md-3 col-form-label' for='contactInput'>Target Contact</label>
+        	    <div class='col-md-2'>
+        	        <input type='number' class='form-control' id='contactInput' 
+        	            placeholder='Eg: 1231231234' name='contact' />
+        	    </div>
+        	</div>
+	";
 
-	echo '		<label>Limit of texts to search</label>';
-	echo '		<input type="number" name="limit" min="0" value="25" />';
+	// Printing the limit number of messages to search for
+	echo "
+			<div class='row'>
+        	    <label class='col-md-3 col-form-label' for='limitInput'>Limit of texts to search</label>
+        	    <div class='col-md-2'>
+        	        <input type='number' class='form-control' id='limitInput' 
+        	            min='0' value='25' name='limit' />
+        	    </div>
+        	</div>
+	";
 
-	echo '		<input type="submit" name="submit" value="search" />';
+	echo '		<input class="col-form-control" type="submit" name="submit" value="search" />';
 	echo '	</form>';
-	echo '</div>';
 	echo '<div id="formErrorMessage_conversationSearch"></div>';
 }
 
@@ -218,15 +241,6 @@ function displayConversations($smsSearchResults) {
 		echo "<div class='error'>Error: Cannot print conversation history (Search failed)</div>";
 		return;
 	} 
-
-	// Print the jquery function to format the datatable
-	echo ' <script>                          
-	$(document).ready(function(){ 
-		$("#conversations").DataTable({
-			"pageLength": 25      
-		});                       
-	});                           
-	</script>';
 
 	// Iterate through conversation histories, and print all of the conversations to a
 	//	table to be fancied up by jquery's datatable

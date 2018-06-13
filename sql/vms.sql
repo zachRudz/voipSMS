@@ -4,7 +4,6 @@ CREATE TABLE users (
 	vms_email varchar(255) NOT NULL,
 	vms_apiPassword varchar(255) NOT NULL,
 	userPassword varchar(255) NOT NULL,
-	name varchar(255) NOT NULL,
 	userType ENUM('U', 'A') NOT NULL,
 
 	PRIMARY KEY (userID)

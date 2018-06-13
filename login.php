@@ -3,23 +3,43 @@
 	Login page
 
 	If the user didn't supply the right login info, show them to a login form.
-	Also, display $message to them.
+	Also, display $message to them in the form of an error.
 */
-function printLoginPage($message) {
-	echo ' <!DOCTYPE html>
-		<html> 
-		<head> 
-		    <meta charset="utf-8">
-			<link rel="stylesheet" type="text/css" href="css/main.css" /> 
-			<title>voipSMS: Login failed</title> 
+function printLoginPage($message = null) {
+	require_once("pageTop.php");
+	echo '	<title>voipSMS: Login</title> 
 		</head> 
-		<body>';
-		require_once('header.php'); 
-	echo "<div class='error'>{$message}</div>";
-	echo '</body> 
-		</html>';
+		<body class="text-center">';
+	include_once('header.php'); 
+
+	// Login form
+	echo '
+	<form class="container" action="login.php" method="POST">
+		<h1 class="h3 my-3 font-weight-normal">Sign in</h1>
+		<div class="form-group">
+			<label for="emailInput">Email Address</label>
+			<input type="email" class="form-control" id="emailInput" aria-describedby="emailHelp" placeholder="Enter email" name="vms_email" required />
+		</div>
+	
+		<div class="form-group">
+			<label for="passwordInput">Password</label>
+			<input type="password" class="form-control" id="passwordInput" aria-describedby="passwordHelp" placeholder="Password" name="userPassword" required />
+		</div>
+
+		<button type="submit" class="btn btn-primary">Submit</button>
+	</form> ';
+
+	// Errors, if any
+	if($message != "") {
+		echo "<div class='alert alert-danger'><strong>Error:</strong> {$message}</div>";
+	}
+
+	echo '</body>';
+	require_once("pageBottom.php");
 }
 
+
+// Attempt to login the user
 function loginUser() {
 	session_start();
 	require_once("sql/dbQueries.php");
@@ -35,20 +55,14 @@ function loginUser() {
 		$_SESSION['auth'] = TRUE;
 		$_SESSION['auth_info'] = $userData[0];
 
-		// -- Setting the user's active DID --
-		if($userData[0]['default_did'] == null) {
-			// User hasn't selected a DID yet.
-			// Fetch all the user's DIDs, and try to set the first one as the default.
-			$dids = getDIDs($_SESSION['auth_info']['userID']);
-			if(count($dids) == 0) {
-				$_SESSION['auth_info']['activeDID'] = "No user DID selected.";
-			} else {
-				$_SESSION['auth_info']['activeDID'] = $dids[0]['did'];
-			}
+		// Fetching the DID for the user's default DID.
+		$activeDID = getDIDFromID($userData[0]['didID_default']);
+		if($activeDID != false) {
+			$_SESSION['auth_info']['activeDID'] = $activeDID['did'];
 		} else {
-			// User has selected a DID before.
-			$_SESSION['auth_info']['activeDID'] = $userData[0]['default_did'];
+			$_SESSION['auth_info']['activeDID'] = null;
 		}
+		//print_r($_SESSION);
 
 		// Head back home
 		header("Location: index.php");
@@ -68,16 +82,17 @@ function loginUser() {
 	Else:	
 		Show them an error message.
 */
-if($_SERVER['REQUEST_METHOD'] != "POST") {
-	printLoginPage("Error: No login information supplied.");
+if($_SERVER['REQUEST_METHOD'] == "GET") {
+	// User got here via GET. Display the login form.
+	printLoginPage();
 } else {
 	// Also, test if they supplied the right login info
-	if(isset($_POST['vms_email'])
-	&& isset($_POST['userPassword'])) { 
+	if(isset($_POST['vms_email']) && isset($_POST['userPassword'])) { 
 		// User supplied all the right info; Attemt to log them in
 		loginUser();
+
 	} else {
-			printLoginPage("Error: Not all login information supplied.");
+		printLoginPage("Not all login information supplied.");
 	}
 }
 ?>

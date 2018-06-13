@@ -1,4 +1,5 @@
-<?php require_once("vms_api.php");
+<?php 
+require_once("vms_api.php");
 require_once("sql/dbinfo.php");
 require_once("sql/dbQueries.php"); 
 
@@ -27,26 +28,45 @@ require_once("sql/dbQueries.php");
 	Don't wanna.
 */
 function displaySMSConversationSearchForm($target) {
-	echo '<div class="formWrapper">';
-	echo '  <h3>Filter this conversation</h3>';
-	echo '  <form action="sms.php" method="get" ';
-	echo '	name="conversationFilter" onsubmit="return validateConversationFilter()">';
-	echo '      <label>From </label>';
-	echo '      <input type="date" name="from" placeholder="yyyy-mm-dd" />';
-	
-	echo '      <label>To</label>';
-	echo '      <input type="date" name="to" placeholder="yyyy-mm-dd" />';
-	
-	echo '      <label>Contact</label>';
-	echo '      <input type="input" name="target" value="' .$target.'" ' .
-		'placeholder="Eg: 1231231234" />';
-	
-	echo '      <label>Limit of texts to search</label>';
-	echo '      <input type="number" name="limit" min="0" value="100" />';
-	
-	echo '      <input type="submit" name="submit" value="filter" />';
-	echo '  </form>';
-	echo '</div>';
+    echo "
+    <div class='container-fluid rounded border border-primary'>
+    <h1 class='h3 my-3 font-weight-normal'>Filter this conversation</h3>
+
+    <form action='sms.php' method='get'
+        name='conversationFilter' onsubmit='return validateConversationFilter()()'>
+        
+		<div class='row'>
+            <label class='col-md-3 col-form-label' for='fromInput'>Date</label>
+            <div class='col-md-2'>
+                <input type='date' class='form-control' id='fromInput' 
+                    placeholder='yyyy-mm-dd' name='from' />
+            </div>
+			<span> to </span>
+            <div class='col-md-2'>
+                <input type='date' class='form-control' id='toInput' 
+                    placeholder='yyyy-mm-dd' name='to' />
+            </div>
+        </div>
+
+		<div class='row'>
+            <label class='col-md-3 col-form-label' for='contactInput'>Contact</label>
+            <div class='col-md-2'>
+                <input type='input' class='form-control' id='contactInput' 
+                    placeholder='Eg: 1231231234' name='target' value='" . $target . "' />
+            </div>
+        </div>
+
+		<div class='row'>
+            <label class='col-md-3 col-form-label' for='limitInput'>Limit of texts to search</label>
+            <div class='col-md-2'>
+                <input type='number' class='form-control' id='limitInput' 
+                    placeholder='VoIP.MS API Password' name='limit' min='0' value='25' />
+            </div>
+        </div>
+
+        <input type='submit' name='submit' value='filter' />
+    </form>
+    </div>";
 	echo '<div id="formErrorMessage_conversationFilter"></div>';
 }
 
@@ -124,15 +144,17 @@ function getConversation($userID, $from, $to, $did, $contact, $limit) {
 	spicey neato HTML
 */
 function displayConversationHistory($conversation) {
-	echo "<div id='conversation'>";
+	echo "<div id='conversation' class='container-fluid rounded border border-primary'>";
 
 	// Making sure that there's actually some SMS messages to parse
 	if($conversation['status'] == "no_sms") {
-		echo "No messages found; Did you search for a broad enough time window?";
+		echo "<div class='alert alert-danger'><strong>Error:</strong>
+			No messages found; Did you search for a broad enough time window?</div>";
 		echo "</div>";
 		return;
 	} else if($conversation['status'] != "success") {
-		echo "Something went wrong (Reason: {$conversation['status']})";
+		echo "<div class='alert alert-danger'><strong>Error:</strong>
+			Something went wrong (Reason: {$conversation['status']})</div>";
 		echo "</div>";
 		return;
 	}
@@ -146,18 +168,22 @@ function displayConversationHistory($conversation) {
 		$sms = $conversation['sms'][$index];
 
 		// Different CSS for recieved/sent messages
+		echo "<div class='sms row my-1'>";
 		if($sms['type'] == 1) {
-			echo "<div class='sms recieved'>";
+			echo "<div class='recieved col-md-8
+				bg-info'>";
 		} else {
-			echo "<div class='sms sent'>";
+			echo "<div class='sent col-md-8 offset-md-4
+				bg-secondary'>";
 		}
 
-		echo "<div class='smsPayload'>";
-		echo htmlspecialchars($sms['message']);
-		echo "</div>";
+		echo "	<div class='smsPayload'>";
+		echo		htmlspecialchars($sms['message']);
+		echo "	</div>";
 
-		echo "<div class='smsDate'>";
-		echo $sms['date'];
+		echo "	<div class='smsDate'>";
+		echo		$sms['date'];
+		echo "	</div>";
 		echo "</div>";
 
 		echo "</div>";
@@ -184,10 +210,14 @@ function displayActiveDIDChangeForm($userID, $currentContact) {
 	// -- Printing the DID selection dropdown --
 	// This is a dropdown form that will allow the user to switch their active DID
 	$dids = getDIDs($userID);
-	echo '<div id="didSelection">
-	<form action="sms.php" method="get">
-		<select name="activeDID">';
+	echo "
+	<div id='didSelection'>
+	<form action='sms.php' method='get'>
+		<div class='row'>
+            <div class='col-md-3'>
+				<select name='activeDID'>";
 	
+
 	// Printing each did
 	foreach($dids as $d) {
 		echo "<option value='{$d['did']}'";
@@ -197,29 +227,29 @@ function displayActiveDIDChangeForm($userID, $currentContact) {
 
 		echo ">{$d['did']}</option>";
 	}
-	echo '</select>';
+	echo "		
+				</select>
+			</div>
+			<div class='col-md-2'>
+			";
 	
 	// Return to the conversation we were in, if there was one
 	if($currentContact != "") {
 		echo '<input type="hidden" name="target" value="' . $currentContact . '" />';
 	}
 
-	echo '<input type="submit" value="Change active DID"/>
+	echo "
+				<input type='submit' value='Change active DID'/>
+            </div>
+		</div>
 	</form>
-	</div>';
+	</div>";
 }
 
 function displayContactPaneContacts($userID) {
-	try{
-		$db = connectToDB();
-
-		// Making the query
-		$query = "SELECT * FROM contacts WHERE ownerID = :userID";
-		$select_stmt = $db->prepare($query);
-		$select_stmt->bindValue(":userID", $userID);
-		$select_stmt->execute();
-
-		// Creating a table, to be formatted by a jquery datatable
+	$contacts = getContacts($userID);
+	if($contacts == False) {
+		// Create the empty table
 		echo "<table id='contactPaneContacts' class='display'>
 			<thead>
 				<tr>
@@ -228,29 +258,41 @@ function displayContactPaneContacts($userID) {
 					<th>Number</th>
 				</tr>
 			</thead>
-			<tbody>";
-
-		// Printing table contents
-		while($data_array = $select_stmt->fetch(PDO::FETCH_ASSOC)) {
-			echo "<tr>";
-				echo "<td><a href='sms.php?target={$data_array['did']}'>";
-					echo "{$data_array['firstName']}";
-				echo "</a></td>";
-				echo "<td><a href='sms.php?target={$data_array['did']}'>";
-					echo "{$data_array['lastName']}";
-				echo "</a></td>";
-				echo "<td><a href='sms.php?target={$data_array['did']}'>";
-					echo "{$data_array['did']}";
-				echo "</a></td>";
-			echo "</tr>";
-		}
-		echo "</tbody>
+			<tbody>
+			</tbody>
 		</table>";
-		
-	} catch(Exception $e) {
-		echo "<div id='error'>Exception caught while displaying contact pane: ";
-		echo $e->getMessage() . "</div>";
+		return;
 	}
+
+
+	// Creating a table, to be formatted by a jquery datatable
+	echo "<table id='contactPaneContacts' class='display'>
+		<thead>
+			<tr>
+				<th>First name</th>
+				<th>Last name</th>
+				<th>Number</th>
+			</tr>
+		</thead>
+		<tbody>";
+
+
+	// Printing table contents
+	foreach($contacts as $contact) {
+		echo "<tr>";
+			echo "<td><a href='sms.php?target={$contact['did']}'>";
+				echo "{$contact['firstName']}";
+			echo "</a></td>";
+			echo "<td><a href='sms.php?target={$contact['did']}'>";
+				echo "{$contact['lastName']}";
+			echo "</a></td>";
+			echo "<td><a href='sms.php?target={$contact['did']}'>";
+				echo "{$contact['did']}";
+			echo "</a></td>";
+		echo "</tr>";
+	}
+	echo "</tbody>
+	</table>";
 }
 
 /**************************************************
@@ -262,7 +304,7 @@ function displayContactPaneContacts($userID) {
 */
 function displayContactPane($userID, $currentContact) {
 	// Begin building the pane
-	echo "<div id='contactPane'>";
+    echo "<div id='didOptionsContainer' class='container-fluid rounded border border-primary'>";
 	echo "<h3>DID Options</h3>";
 
 	// Printing active DID selection form
@@ -270,14 +312,25 @@ function displayContactPane($userID, $currentContact) {
 
 	// Print form to let the user text a new DID
 	// This would be something that they would input via an HTML form
-	echo '<form action="sms.php" method="get"';
-	echo ' name="newSMS" onsubmit="return validateNewSMS()">';
-		echo '<input type="text" placeholder="Eg: 1231231234" name="target">';
-		echo '<input type="submit" value="Text new number"/>';
-		echo '<span id="formErrorMessage_newSMS"></span>';
-	echo '</form>';
+	echo "
+	<form action='sms.php' method='get'
+		name='newSMS' onsubmit='return validateNewSMS()'>
+        
+		<div class='row'>
+            <div class='col-md-3'>
+                <input type='input' class='form-control' id='targetInput' 
+                    placeholder='Eg: 1231231234' name='target' />
+            </div>
+            <div class='col-md-2'>
+				<input type='submit' value='Text new number' />
+            </div>
+        </div>
+		<span id='formErrorMessage_newSMS'></span>
+    </form>
+    </div>";
 
 	// Get all of the user's contacts
+    echo "<div id='contactsContainer' class='container-fluid rounded border border-primary'>";
 	echo "<h3>Contacts</h3>";
 	displayContactPaneContacts($userID); 
 
@@ -290,21 +343,24 @@ function displayContactPane($userID, $currentContact) {
 	Display Send SMS Form
 */
 function displaySendSMSForm($target) {
-	echo '<div div="sendSMS">';
-	echo '<div class="formWrapper">';
-	echo "	<form action='sms.php?target={$target}' method='post' ";
-	echo '		name="sendSMS" onsubmit="return validateSendSMS()">';
-		// Used for js client-side validation
-		echo "<input type='hidden' name='target' value='{$target}' />";
-		echo "<input type='hidden' name='activeDID' value='{$_SESSION['auth_info']['activeDID']}' />";
+	echo "
+    <div id='didOptionsContainer' class='container-fluid rounded border border-primary'>
+		<h1 class='h4 font-weight-normal'>
+			Send a message to ${target} from " . $_SESSION['auth_info']['activeDID'] . "
+		</h1>
+		<form action='sms.php' method='post'
+			name='sendSMS' onsubmit='return validateSendSMS()'>
+			<input type='hidden' name='target' value='{$target}' />
+			
+			<textarea id='sendSMS' class='form-control' name='message' maxlength='160' 
+				required placeholder='Send an SMS...'></textarea>
+			<input type='submit' name='send' value='Send' />
+			</div>
+		</form>
+		</div>
+	</div>";
 
-		echo '<textarea id="sendSMS" name="message" maxlength="160" required ';
-		echo 'placeholder="Send an SMS..."></textarea>';
-		echo "<input type='submit' name='send' value='Send' />";
-		echo "<span id='formErrorMessage_sendSMS'></span>";
-	echo '	</form>';
-	echo '</div>';
-	echo '</div>';
+	echo "<div id='formErrorMessage_sendSMS'></div>";
 }
 
 

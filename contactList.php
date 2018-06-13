@@ -74,67 +74,11 @@ function listContacts() {
 /**************************************************
 	Entry Point
 */
+require_once("pageTop.php");
+require_once("imports/datatables_css.php");
 ?>
-<!DOCTYPE html>
-<html>
-    <meta charset="utf-8">
+
 	<title>voipSMS: Contact List</title>
-	<link rel="stylesheet" type="text/css" href="css/main.css" />
-
-	<script src="//code.jquery.com/jquery-1.12.0.min.js"></script>
-	<script src="//cdn.datatables.net/1.10.13/js/jquery.dataTables.min.js"></script>
-	<link rel="stylesheet" type="text/css" href="//cdn.datatables.net/1.10.13/css/jquery.dataTables.min.css" />
-	<script>
-		// JQuery DataTable stuff
-		$(document).ready(function(){
-			$('#contacts').DataTable({
-				"pageLength": 25
-			});
-		});
-
-	// Make sure form is filled completely and such.
-	function validateDeleteContacts() {
-		var errors = [];
-		var form = document.forms['deleteContacts'];
-		var errorMessage = document.getElementById('formErrorMessage');
-		
-		// Clear error classes from inputs
-		errorMessage.classList.remove('error');
-		
-		// Clear the error div
-		errorMessage.innerHTML = "";
-		
-		// -- Begin processing form --
-		// Making sure something's checked
-		var i = 0;
-		for(i = 0; i < form['contactID[]'].length; i++) {
-			if(form['contactID[]'][i].checked) {
-				var notEmpty = true;
-			}
-		}
-
-		if(!notEmpty) {
-			errors.push("No contacts selected.");
-		}
-		
-		// -- Writing errors --
-		var numErrors = errors.length;
-		if(numErrors > 0) {
-			// Loop though errors and write them to the error message div
-			errorMessage.innerHTML = "Errors found while processing the form:";
-			
-			for(var i = 0; i < numErrors; i++) {
-			errorMessage.innerHTML += "<br />";
-			errorMessage.innerHTML += errors[i];
-			}
-			
-			errorMessage.classList.add('error');
-			return false;
-		}
-		
-		return true;
-	}
-	</script>
 </head>
 <body>
 <?php 
@@ -153,9 +97,67 @@ function listContacts() {
 		listContacts();		
 	} else {
 		// User isn't logged in, tell them
-		echo '<div id="error">'; 
+		echo '<div class="alert alert-danger">'; 
 		echo "Error: You can't add a contact while you're logged out.</div>";
 	}
 ?>
 </body>
+<?php 
+	require_once("pageBottom.php");
+	require_once("imports/datatables.php");
+?>
+
+<script>
+	// JQuery DataTable stuff
+	$(document).ready(function(){
+		$('#contacts').DataTable({
+			"pageLength": 25
+		});
+	});
+
+	// Make sure form is filled completely and such.
+	function validateDeleteContacts() {
+		var errors = [];
+		var form = document.forms['deleteContacts'];
+		var errorMessage = document.getElementById('formErrorMessage');
+		
+		// Clear error classes from inputs
+		errorMessage.classList.remove('alert');
+		errorMessage.classList.remove('alert-danger');
+		
+		// Clear the error div
+		errorMessage.innerHTML = "";
+		
+		// -- Begin processing form --
+		// Making sure something's checked
+		var i = 0;
+		for(i = 0; i < form['contactID[]'].length; i++) {
+			if(form['contactID[]'][i].checked) {
+				var notEmpty = true;
+			}
+		}
+	
+		if(!notEmpty) {
+			errors.push("No contacts selected.");
+		}
+		
+		// -- Writing errors --
+		var numErrors = errors.length;
+		if(numErrors > 0) {
+			// Loop though errors and write them to the error message div
+			errorMessage.innerHTML = "Errors found while processing the form:";
+			
+			for(var i = 0; i < numErrors; i++) {
+			errorMessage.innerHTML += "<br />";
+			errorMessage.innerHTML += errors[i];
+			}
+			
+			errorMessage.classList.add('alert');
+			errorMessage.classList.add('alert-danger');
+			return false;
+		}
+		
+		return true;
+	}
+</script>
 </html>

@@ -1,36 +1,39 @@
-<div id="banner">
-	<div id="bannerLogo">
-		<a href="index.php">
-			<span id='logo_voip'>VoIP</span><span id='logo_sms'>SMS</span>
-		</a>
+<nav class="navbar navbar-expand-md navbar-dark bg-dark">
+	<a class="navbar-brand" href="index.php">VoIPSMS</a>
+	<button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" 
+		aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+	    <span class="navbar-toggler-icon"></span>
+	</button>
+
+	<div class="collapse navbar-collapse" id="navbarSupportedContent">
+		<ul class="navbar-nav">
+		<?php
+		// Test if the user's logged in or not.
+		// If they aren't print a login screen
+		if(isset($_SESSION['auth'])) {
+			// User is logged in
+			echo '<li class="nav-item">';
+			echo '	<a class="nav-link" href="sms.php">SMS Portal</a>';
+			echo '</li>';
+			echo '<li class="nav-item">';
+			echo '	<a class="nav-link" href="contactList.php">Contacts</a>';
+			echo '</li>';
+			echo '<li class="nav-item">';
+			echo '	<a class="nav-link" href="account.php">My Account</a>';
+			echo '</li>';
+			echo '<li class="nav-item">';
+			echo '	<a class="nav-link" href="logout.php">Logout</a>';
+			echo '</li>';
+		} else {
+			// User is not logged in
+			echo '<li class="nav-item">';
+			echo '	<a class="nav-link" href="register.php">Register</a>';
+			echo '</li>';
+			echo '<li class="nav-item">';
+			echo '	<a class="nav-link" href="login.php">Login</a>';
+			echo '</li>';
+		}
+		?>
+		</ul>
 	</div>
-
-	<?php
-	// Test if the user's logged in or not.
-	// If they aren't print a login screen
-	if(isset($_SESSION['auth'])) {
-		// User is logged in
-		echo '<span id="bannerGreeting">Hello, '; 
-		echo htmlspecialchars($_SESSION['auth_info']['name'], ENT_QUOTES);
-		echo '</span> ';
-		
-		echo '(<a href="account.php">My Account</a>, ';
-		echo '<a href="logout.php">Logout</a>)';
-		echo ' <a href="sms.php">SMS Portal</a>';
-	} else {
-		// User is not logged in
-		echo '<form action="login.php" method="POST">
-			<span>Login: </span>
-		
-			<span>Email</span>
-			<input name="vms_email" />
-		
-			<span>Password </span>
-			<input type="password" name="userPassword" />
-
-			<input type="submit">
-		</form>
-		<a href="register.php">Register</a>';
-	}
-	?>
-</div>
+</nav>

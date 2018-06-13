@@ -7,12 +7,11 @@
 	This is the format that voip.ms takes in their API.
 */
 
-function validateDID(did) { 
-    if(/\d{10}/.test(did))  
-		return (true)       
+function validateDID(did) {
+    var re = new RegExp("^\\d+$");
+	    return re.test(did);
+}
 
-	return (false)          
-}                           
 
 /**************************************************
 	Validate date
@@ -76,10 +75,8 @@ function validateConversationSearch() {
 	var errorMessage = document.getElementById('formErrorMessage_conversationSearch');
 	
 	// Clear error classes from inputs
-	errorMessage.classList.remove('error');
-	form['limit'].classList.remove("formError");
-	form['from'].classList.remove("formError");
-	form['to'].classList.remove("formError");
+	errorMessage.classList.remove('alert');
+	errorMessage.classList.remove('alert-danger');
 	
 	// Clear the error div
 	errorMessage.innerHTML = "";
@@ -88,21 +85,18 @@ function validateConversationSearch() {
 	// Making sure the limit is valid
 	if(form['limit'].value < 1) {
 		errors.push("Limit must be positive.");
-		form['limit'].classList.add("formError");
 	}
 
 	// Making sure the to/from dates are valid
 	if(form['from'].value != "") {
 		if(!validateDate(form['from'].value)) {
 			errors.push("From date must be in format 'yyyy-mm-dd'.");
-			form['from'].classList.add("formError");
 		}
 	}
 	
 	if(form['to'].value != "") {
 		if(!validateDate(form['to'].value)) {
 			errors.push("To date must be in format 'yyyy-mm-dd'.");
-			form['to'].classList.add("formError");
 		}
 	}
 
@@ -110,14 +104,16 @@ function validateConversationSearch() {
 	var numErrors = errors.length;
 	if(numErrors > 0) {
 		// Loop though errors and write them to the error message div
-		errorMessage.innerHTML = "Errors found while searching for a conversation:";
+		errorMessage.innerHTML = "<strong>Error</strong>: " +
+			"Something went wrong while searching for a conversation:";
 		
 		for(var i = 0; i < numErrors; i++) {
 			errorMessage.innerHTML += "<br />";
 			errorMessage.innerHTML += errors[i];
 		}
 		
-		errorMessage.classList.add('error');
+		errorMessage.classList.add('alert');
+		errorMessage.classList.add('alert-danger');
 		return false;
 	}
 	
@@ -218,14 +214,14 @@ function validateSendSMS() {
 	
 	// -- Begin processing form --
 	// Making sure the limit is valid
-	if(form['message'].value < 1 || form['message'].value > 160) {
-		errors.push("Message must be between 0-160 characters.");
+	if(form['message'].value < 1 || form['message'].value >= 160) {
+		errors.push("Message must be between 1-160 characters.");
 		form['message'].classList.add("formError");
 	}
 
 	// Making sure contact DID is valid
 	if(!validateDID(form['target'].value)) {
-			errors.push("Contact phone number is not in the right format. Example format: '1231231234'");
+		errors.push("Contact phone number is not in the right format. Example format: '1231231234'");
 	}
 
 	// -- Writing errors --
