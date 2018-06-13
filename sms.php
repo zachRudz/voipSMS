@@ -151,6 +151,7 @@ require_once("imports/datatables_css.php");
 					Also display the form to let them to filter again.
 				
 			***************************************************************************/
+			echo "<div class='container-fluid rounded border border-primary'>";
 			displayConversationSearchForm();
 			if($_SERVER['REQUEST_METHOD'] == "POST") {
 
@@ -171,7 +172,7 @@ require_once("imports/datatables_css.php");
 						if($smsSearchResults['status'] != "success") {
 							// Conversation search failed
 							// Let the user know why
-							echo '<div class="error">
+							echo '<div class="alert alert-danger">
 								Error: Conversation search failed. Reasons:
 								<ul>';
 							foreach($smsSearchResults['errors'] as $errors) {
@@ -184,12 +185,13 @@ require_once("imports/datatables_css.php");
 						displayConversations($smsSearchResults);
 					} else { 
 						// Conversation form wasn't filled out properly. Complain moar
-						echo '<div class="error">
-						Error: There is missing information in the conversation search form.
+						echo '<div class="alert alert-danger">
+							Error: There is missing information in the conversation search form.
 						</div>';
 					}
 				} 
 			} // Submitted conversation search form?
+			echo "</div>";
 		} // SMS conversation or search for conversation?
 	} 
 ?>
@@ -201,6 +203,13 @@ require_once("imports/datatables_css.php");
 	// JQuery DataTable stuff for the contact pane
 	$(document).ready(function(){
 		$('#contactPaneContacts').DataTable({
+			"pageLength": 25
+		});
+	});
+
+	// JQuery DataTable stuff for the conversation history search
+	$(document).ready(function(){
+		$('#conversations').DataTable({
 			"pageLength": 25
 		});
 	});

@@ -75,10 +75,8 @@ function validateConversationSearch() {
 	var errorMessage = document.getElementById('formErrorMessage_conversationSearch');
 	
 	// Clear error classes from inputs
-	errorMessage.classList.remove('error');
-	form['limit'].classList.remove("formError");
-	form['from'].classList.remove("formError");
-	form['to'].classList.remove("formError");
+	errorMessage.classList.remove('alert');
+	errorMessage.classList.remove('alert-danger');
 	
 	// Clear the error div
 	errorMessage.innerHTML = "";
@@ -87,21 +85,18 @@ function validateConversationSearch() {
 	// Making sure the limit is valid
 	if(form['limit'].value < 1) {
 		errors.push("Limit must be positive.");
-		form['limit'].classList.add("formError");
 	}
 
 	// Making sure the to/from dates are valid
 	if(form['from'].value != "") {
 		if(!validateDate(form['from'].value)) {
 			errors.push("From date must be in format 'yyyy-mm-dd'.");
-			form['from'].classList.add("formError");
 		}
 	}
 	
 	if(form['to'].value != "") {
 		if(!validateDate(form['to'].value)) {
 			errors.push("To date must be in format 'yyyy-mm-dd'.");
-			form['to'].classList.add("formError");
 		}
 	}
 
@@ -109,14 +104,16 @@ function validateConversationSearch() {
 	var numErrors = errors.length;
 	if(numErrors > 0) {
 		// Loop though errors and write them to the error message div
-		errorMessage.innerHTML = "Errors found while searching for a conversation:";
+		errorMessage.innerHTML = "<strong>Error</strong>: " +
+			"Something went wrong while searching for a conversation:";
 		
 		for(var i = 0; i < numErrors; i++) {
 			errorMessage.innerHTML += "<br />";
 			errorMessage.innerHTML += errors[i];
 		}
 		
-		errorMessage.classList.add('error');
+		errorMessage.classList.add('alert');
+		errorMessage.classList.add('alert-danger');
 		return false;
 	}
 	
