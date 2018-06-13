@@ -23,6 +23,7 @@ require_once('dbinfo.php');
 
 	-- Contacts --
 	getContact()
+	getContacts()
 	updateContact()
 	deleteContact()
 	addContact()
@@ -455,6 +456,34 @@ function getContact($userID, $contactID) {
 		}
 	} catch(Exception $e) {
 		echo "<div class='error'>Exception caught: " . $e->getMessage() . "</div>";
+		return False;
+	}
+}
+
+/**************************************************
+	Get Contacts
+
+	Returns all of the contacts for the user
+
+	Returns false if something went wrong.
+*/
+function getContacts($userID) {
+	// Getting all DIDs for this user
+	try {
+		$db = connectToDB();                                                 
+
+		// Validating user login against db                                  
+		// Getting all of the contacts for this user                                    
+		$query = "SELECT * FROM contacts WHERE ownerID = :ownerID";
+		$select_stmt = $db->prepare($query);
+		$select_stmt->bindValue(":ownerID", $userID);     
+		$select_stmt->execute();
+
+		// Checking if we've got a match                                     
+		$userData = $select_stmt->fetchAll(PDO::FETCH_ASSOC);                   
+		return $userData;
+	} catch(Exception $e) {
+		echo "<div class='alert alert-danger'>Exception caught: " . $e->getMessage() . "</div>";
 		return False;
 	}
 }

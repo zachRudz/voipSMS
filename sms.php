@@ -1,66 +1,38 @@
 <?php
 session_start();
-require_once('sql/dbinfo.php');
 require_once('vms_api.php');
 require_once('conversationHistory.php');
 require_once("smsConversation.php");
+
+require_once("pageTop.php");
+require_once("imports/datatables_css.php");
 ?>
-<!DOCTYPE html>
-<html>
-<head>
-	<meta charset="utf-8" />
-	<link rel="stylesheet" type="text/css" href="css/main.css" />
 	<title>voipSMS: SMS Center</title>
 
-	<script src="//code.jquery.com/jquery-1.12.0.min.js"></script>
-	<script src="//cdn.datatables.net/1.10.13/js/jquery.dataTables.min.js"></script>
-	<link rel="stylesheet" type="text/css" href="//cdn.datatables.net/1.10.13/css/jquery.dataTables.min.css" />
-
-	<script>
-		// JQuery DataTable stuff for the contact pane
-		$(document).ready(function(){
-			$('#contactPaneContacts').DataTable({
-				"pageLength": 25
-			});
-		});
-
-		/**************************************************
-		 Spicey scriptaroonie to jump to the bottom of the webpage when the page loads
-
-		 This is because the newest texts should be at the bottom of the page; 
-		 Which the user prolly wants to see.
-		*/
-		function scrollToBottom() {
-			window.scrollTo(0,document.body.scrollHeight);
-		}
-	</script>
-
-	<script src="js/smsValidation.js"></script>
 </head>
 <body onload="scrollToBottom()">
 <?php 
 	include_once("header.php");
 	// Make sure we're logged in
 	if(!isset($_SESSION['auth'])) {
-		echo '<div class="error">
-		Error: You must be logged in first.
-		</div>';
+		echo '<div class="alert alert-danger">
+			Error: You must be logged in first.</div>';
+
+	// User is logged in
 	} else {
-		// Test if the user got here via changing their active DID.
-		// If so, set the $_SESSION variable accordingly and continue doing 
-		//	whatever they were doing.
-		// $_REQUEST['target'] should be set if they were in a conversation.
+
+		// Attempt to save the user's DID to the DB.
+		// This will fail if the DID recieved via the form ($_REQUEST) doesn't belong to the user.
+		// In that case, don't bother setting the $_SESSION variable.
 		if(isset($_REQUEST['activeDID'])) {
-			// Attempt to save the user's DID to the DB.
-			// This will fail if the DID recieved via the form ($_REQUEST) doesn't belong to the user.
-			// In that case, don't bother setting the $_SESSION variable.
+			// Attempt to update the default DID in the DB
 			if(setDefaultDID($_SESSION['auth_info']['userID'], $_REQUEST['activeDID'])) {
 				$_SESSION['auth_info']['activeDID'] = htmlspecialchars($_REQUEST['activeDID']);
 
 				echo "<div class='alert alert-success'><strong>Success:</strong>
 					Active DID updated.</div>";
 			} else {
-				echo "<div class='alert alert-error'><strong>Error:</strong>
+				echo "<div class='alert alert-danger'><strong>Error:</strong>
 					Unable to set the default DID.</div>";
 			}
 		}
@@ -121,7 +93,7 @@ require_once("smsConversation.php");
 						if($sendSMSResult['status'] != "success") {
 							// SMS Sending failed 
 							// Let the user know why
-							echo "<div class='error'>";
+							echo "<div class='alert alert-danger'>";
 							echo "Error: Sending of SMS message failed (Status: {$sendSMSResult['status']}) ";
 							// If something went wrong on the vms side, this won't be set.
 							// However, if local server-side validation failed, we will have 
@@ -166,6 +138,9 @@ require_once("smsConversation.php");
 				displaySendSMSForm($_REQUEST['target']);
 
 			} // Make sure $target != ""
+
+		// User has not selected an SMS target.
+		// Display the conversation search form on HTTP GET, or display the results on HTTP POST
 		} else {
 
 			/***************************************************************************
@@ -219,4 +194,27 @@ require_once("smsConversation.php");
 	} 
 ?>
 </body>
+<?php require_once("pageBottom.php"); ?>
+<?php require_once("imports/datatables.php"); ?>
+
+<script>
+	// JQuery DataTable stuff for the contact pane
+	$(document).ready(function(){
+		$('#contactPaneContacts').DataTable({
+			"pageLength": 25
+		});
+	});
+
+	/**************************************************
+	 Spicey scriptaroonie to jump to the bottom of the webpage when the page loads
+
+	 This is because the newest texts should be at the bottom of the page; 
+	 Which the user prolly wants to see.
+	*/
+	function scrollToBottom() {
+		window.scrollTo(0,document.body.scrollHeight);
+	}
+</script>
+
+<script src="js/smsValidation.js"></script>
 </html>
