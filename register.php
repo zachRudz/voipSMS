@@ -82,7 +82,7 @@ function printRegistrationForm() {
 	
 	Validate user input, add to db, and redirect to home page
 */
-function createUser() {
+function attemptToCreateUser() {
 	require_once('sql/dbinfo.php');
 	require_once('sql/dbQueries.php');
 	require_once('vms_api.php');
@@ -100,11 +100,8 @@ function createUser() {
 		// Begin testing the actual contents of the form
 
 		// Making sure that the email isn't a duplicate
-		$select_stmt = $db->prepare("SELECT * FROM `users` WHERE vms_email = :vms_email");
-		$select_stmt->bindValue(":vms_email", trim($_POST['vms_email']));
-		$select_stmt->execute();
 
-		if($select_stmt->rowCount() != 0) {
+		if(! isEmailUnique($_POST['vms_email'])) {
 			$validated = False;
 			$errors[] = "A user with this email already exists.";
 		} 
@@ -145,12 +142,12 @@ function createUser() {
 	// Testing if validation failed or not
 	if(!$validated) {
 		// Validation failed, let the user know.
-		echo "<div>User form validation failed:</div>";
-		echo '<ul class="errors">';
+		echo "<div class='alert alert-danger'><strong>Error:</strong> User form validation failed!";
+		echo '<ul>';
 		foreach($errors as $e) {
 			echo "<li>" . $e . "</li>";
 		}
-		echo '</ul>';
+		echo '</ul></div>';
 
 		// Also, print the registration form again so they can try again.
 		printRegistrationForm();
@@ -158,36 +155,34 @@ function createUser() {
 	}
 	
 	// -- Adding user to db --
-	$add_stmt = $db->prepare("INSERT INTO `users` (`vms_email`, `vms_apiPassword`, `userPassword`) VALUES (:vms_email, :vms_apiPassword, SHA2(:userPassword,256))");
-	
-	$add_stmt->bindValue(":vms_email", trim($_POST['vms_email']));
-	$add_stmt->bindValue(":vms_apiPassword", base64_encode(trim($_POST['vms_apiPassword'])));
-	$add_stmt->bindValue(":userPassword", trim($_POST['password']));
-	$add_stmt->execute();
+	$res = createUser($_POST['vms_email'], $_POST['vms_apiPassword'], $_POST['password']);
 
-	if($add_stmt->rowCount() != 1) {
-		$errors[] = "There was a problem saving your data to the database. Please try again later.";
-
-		// Validation failed, let the user know.
-		echo "<div>User form validation failed:</div>";
-		echo '<ul class="errors">';
-		foreach($errors as $e) {
-			echo "<li>" . $e . "</li>";
-		}
-		echo '</ul>';
+	if($res == False) {
+		echo "<div class='alert alert-danger'><strong>Error:</strong> 
+			Something went wrong when creating your account.</div>";
 	} else {
-		echo "<div class='alert alert-success'><strong>Success! </strong>
-			Added user successfully. </div>";
+		// User created successfully! Attempt to sync their DIDs, now that the user exists.
 
 		// -- Adding user's DIDs to the db --
 		// We need the user's user ID first though.	
 		$user = getUserFromLogin($_POST['vms_email'], $_POST['password']);
 		if($user == False) {
-			echo "Unable to add DIDs; User not found in DB.";
+			echo "<div class='alert alert-danger'><strong>Error:</strong> 
+				Something went wrong when creating your account.
+				(User account created successfully, but can't fetch that user from the DB 
+				via their credentials).</div>";
 			return;
 		}
 
-		syncUserDIDs($user[0]['userID']);
+		// Attempting to sync their DIDs
+		$didSyncStatus = syncUserDIDs($user[0]['userID']);
+		if($didSyncStatus == False) {
+			echo "<div class='alert alert-warning'><strong>Warning:</strong> 
+				Your account has been created, but your DIDs weren't able to be synced.</div>";
+		} else {
+			echo "<div class='alert alert-success'><strong>Success! </strong>
+				Added user successfully. </div>";
+		}
 	}
 }
 
@@ -209,11 +204,12 @@ require_once("pageTop.php");
 	// If the form was submitted, attempt to create a user.
 	// Otherwise, print the registration form 
 	if($_SERVER['REQUEST_METHOD'] === "POST") {
-		createUser();		
+		attemptToCreateUser();		
 	} else {
 		// Make sure that the user's not already logged in.
 		if(isset($_SESSION['auth'])) {
-			echo "<div class='alert alert-danger'><strong>Error:</strong> You can't register a user while you're logged in.</div>";
+			echo "<div class='alert alert-danger'><strong>Error:</strong> 
+				You can't register a user while you're logged in.</div>";
 		}  else {
 			printRegistrationForm();
 		}

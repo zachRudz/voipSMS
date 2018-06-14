@@ -15,11 +15,13 @@ require_once('dbinfo.php');
 	setDefaultDID()
 
 	-- Users --
+	createUser()
 	getUserAPICredentials()
 	getUser()
 	getUserFromLogin()
 	alterUser()
 	deleteUser()
+	isEmailUnique()
 
 	-- Contacts --
 	getContact()
@@ -227,6 +229,29 @@ function setDefaultDID($userID, $didValue) {
 	}
 }
 
+function createUser($vms_email, $vms_apiPassword, $userPassword) {
+	try {
+		$db = connectToDB();                                                 
+
+	    // -- Adding user to db --
+	    $query = "INSERT INTO `users` 
+			(`vms_email`, `vms_apiPassword`, `userPassword`) 
+			VALUES (:vms_email, :vms_apiPassword, SHA2(:userPassword,256))";
+	
+		$add_stmt = $db->prepare($query);
+		$add_stmt->bindValue(":vms_email", trim($vms_email));
+		$add_stmt->bindValue(":vms_apiPassword", base64_encode(trim($vms_apiPassword)));
+		$add_stmt->bindValue(":userPassword", trim($userPassword));
+		$add_stmt->execute();
+	} catch(Exception $e) {
+		echo "<div class='error'>Exception caught while adding contact to DB: ";
+		echo $e->getMessage() . "</div>";
+		return False;
+	}
+
+	return True;
+}
+
 
 /**************************************************
 	Get user API Credentials
@@ -281,6 +306,39 @@ function getUser($userID) {
 			return False;
 
 		return $res[0];
+	} catch(Exception $e) {
+		echo "<div class='error'>Exception caught: " . $e->getMessage() . "</div>";
+	}
+}
+
+/**************************************************
+	Get user info from login
+
+	Returns the user's ID, email, and default DID if the user exists.
+	Return false otherwise.
+*/
+function getUserFromLogin($vms_email, $userPassword) {
+	// Getting all DIDs for this user
+	try {
+		$db = connectToDB();
+		
+		// Getting all of the contacts for this user
+		$query = "SELECT userID, vms_email, didID_default
+			FROM `users` WHERE 
+			vms_email=:vms_email AND userPassword=SHA2(:userPassword, 256)";
+
+		$select_stmt = $db->prepare($query);
+		$select_stmt->bindValue(":vms_email", $vms_email);
+		$select_stmt->bindValue(":userPassword", $userPassword);
+		$select_stmt->execute();
+		
+		// Grab all the data
+		if($select_stmt->rowCount() == 1) {
+			$userData = $select_stmt->fetchAll(PDO::FETCH_ASSOC);
+			return $userData;
+		} else {
+			return False;
+		}
 	} catch(Exception $e) {
 		echo "<div class='error'>Exception caught: " . $e->getMessage() . "</div>";
 	}
@@ -397,31 +455,25 @@ function deleteUser($userID) {
 }
 
 /**************************************************
-	Get user from email/password
+	Is Email Unique
 
-	Returns the user's ID, email and base64 encoded API password
+	Returns True if no user exists with the supplied email
 */
-function getUserFromLogin($vms_email, $vms_password) {
+function isEmailUnique($vms_email) {
 	// Getting all DIDs for this user
 	try {
 		$db = connectToDB();                                                 
 
 		// Validating user login against db                                  
-		$stmt = $db->prepare("SELECT userID, vms_email, didID_default 
-		FROM users WHERE                                                 
-		vms_email=:vms_email AND userPassword=SHA2(:userPassword,256)"); 
+		$stmt = $db->prepare("SELECT userID
+		FROM users WHERE
+		vms_email=:vms_email"); 
 		
 		$stmt->bindValue(":vms_email", trim($vms_email));           
-		$stmt->bindValue(":userPassword", trim($vms_password));     
 		$stmt->execute();                                                    
 		
 		// Checking if we've got a match                                     
-		if($stmt->rowCount() == 1) {                                         
-			$userData = $stmt->fetchAll(PDO::FETCH_ASSOC);                   
-			return $userData;
-		} else {
-			return False;
-		}
+		return $stmt->rowCount() == 0;
 	} catch(Exception $e) {
 		echo "<div class='error'>Exception caught: " . $e->getMessage() . "</div>";
 		return False;
