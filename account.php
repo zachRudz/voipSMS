@@ -235,22 +235,27 @@ require_once("pageTop.php");
 		if($_SERVER['REQUEST_METHOD'] == "POST") {
 			// User is changing their passwords. 
 			if($_POST['submit'] == 'Save') {
+
+				// Attempt to update the user's password, and API password.
+				// If it succeeded, then we should consider syncing their DIDs.
 				if(processAccountChanges()) {
-					echo "<div class='alert alert-success'>";
-					echo "<strong>Success!</strong> Account information updated.";
-					echo "</div>";
-				}
 
-				// Test if the user's change to the api password is valid
-				$user = getUser($_SESSION['auth_info']['userID']);
-				$res = validateLogin($user['vms_email'], 
-					base64_decode($user['vms_apiPassword']));
-
-				if($res['status'] != "success") {
-					echo "<div class='alert alert-warning'>
-					<strong>Warning:</strong>
-					 VoIP.ms API password saved successfully, but it doesn't validate against their server!
-					 (Reason: {$res['status']})</div>";
+					// User's account was updated successfully.
+					// Test if the user's change to the api password is valid
+					// Don't bother trying if the user didn't attempt to change their API password
+					if(isset($_POST['vms_apiPassword'])) {
+						$user = getUser($_SESSION['auth_info']['userID']);
+						$res = validateLogin($user['vms_email'], 
+							base64_decode($user['vms_apiPassword']));
+		
+						if($res['status'] != "success") {
+							echo "<div class='alert alert-warning'>
+							<strong>Warning!</strong>
+							 VoIP.ms API password saved successfully, 
+							 but it doesn't validate against their server!
+							 (Reason: {$res['status']})</div>";
+						}
+					}
 				}
 
 

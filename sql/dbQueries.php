@@ -358,55 +358,53 @@ function alterUser($userID, $vms_apiPassword, $userPassword, $currentPassword) {
 		return False;
 	}
 
-	// Testing if api password is null. If so, don't change it 
-	if(trim($vms_apiPassword) == "") {
-		$new_vms_apiPassword = $user['vms_apiPassword'];
-	} else {
-		$new_vms_apiPassword = base64_encode($vms_apiPassword);
-	}
-
-
-	// Making sure that the user's current password is valid if they want to change it.
-	if($userPassword != "") {
-		if($user['userPassword'] != hash("sha256", $currentPassword)) {
-			// Current password doesn't validate
-			echo "<div class='error'>Cannot change user password (current password incorrect)</div>";
-			$passwordChange = False;
-		} else {
-			// Current password validates
-			$passwordChange = True;
-		}
-	} else {
-		// No password entered in form
-		$passwordChange = False ;
-	}
 
 	// Begin altering the table entry
 	try {
 		$db = connectToDB();                                                 
 
-		// Begin updating the contact
-		if($passwordChange) {
+		// Updating the API password if it needs updating
+		if(trim($vms_apiPassword) != "") {
+			$new_vms_apiPassword = base64_encode(trim($vms_apiPassword));
+
 			// User is changing their password
-			$query = "UPDATE users SET vms_apiPassword = :vms_apiPassword,
-				userPassword = SHA2(:userPassword,256)
-				WHERE userID = :userID";
-	
-			$stmt = $db->prepare($query);
-			$stmt->bindValue(":vms_apiPassword", trim($new_vms_apiPassword));     
-			$stmt->bindValue(":userPassword", trim($userPassword));     
-			$stmt->bindValue(":userID", $userID);     
-		} else {
-			// User isn't changing their password, or they failed to authenticate their password
 			$query = "UPDATE users SET vms_apiPassword = :vms_apiPassword
 				WHERE userID = :userID";
 	
 			$stmt = $db->prepare($query);
 			$stmt->bindValue(":vms_apiPassword", trim($new_vms_apiPassword));     
 			$stmt->bindValue(":userID", $userID);     
+			$stmt->execute();
+			echo "<div class='alert alert-success'><strong>Success!</strong>
+				API password updated.</div>";
 		}
 
-		$stmt->execute();
+
+		// Updating the usser's password 
+		if(trim($userPassword != "")) {
+			// Making sure that the current password matches
+			if($user['userPassword'] != hash("sha256", trim($currentPassword))) {
+				// Current password doesn't validate
+				echo "<div class='alert alert-danger'><strong>Error:</strong>
+					Cannot change user password (current password incorrect)</div>";
+
+				return False;
+
+			} else {
+				// Changing the user's password
+				$query = "UPDATE users SET userPassword = SHA2(:userPassword,256)
+					WHERE userID = :userID";
+	
+				$stmt = $db->prepare($query);
+				$stmt->bindValue(":userPassword", trim($userPassword));     
+				$stmt->bindValue(":userID", $userID);     
+				$stmt->execute();
+				echo "<div class='alert alert-success'><strong>Success!</strong>
+					User password updated.</div>";
+			}
+		}
+
+		// All is well
 		return True;
 	} catch(Exception $e) {
 		echo "<div class='error'>Exception caught: " . $e->getMessage() . "</div>";
