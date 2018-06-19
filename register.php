@@ -1,5 +1,7 @@
 <?php
 session_start();
+require_once('sql/dbQueries.php');
+require_once('vms_api.php');
 
 /**************************************************
 	Print registration form
@@ -83,9 +85,6 @@ function printRegistrationForm() {
 	Validate user input, add to db, and redirect to home page
 */
 function attemptToCreateUser() {
-	require_once('sql/dbinfo.php');
-	require_once('sql/dbQueries.php');
-	require_once('vms_api.php');
 	$db = connectToDB();
 
 	// -- Validating user info --

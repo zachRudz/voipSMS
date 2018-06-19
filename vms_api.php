@@ -190,7 +190,8 @@ function syncUserDIDs($userID) {
 	//  when we can't replace them
 	$dids = getUserDIDs($userID);
 	if($dids['status'] != "success") {
-		echo "<div class='error'>Error: Couldn't fetch the user's DIDs from voip.ms server. 
+		echo "<div class='alert alert-danger'><strong>Error:</strong>
+			Couldn't fetch the user's DIDs from voip.ms server. 
 			(Reason: {$dids['status']}) </div>";
 		return False;
 	}
@@ -220,7 +221,7 @@ function syncUserDIDs($userID) {
 
 		return True;
 	} catch(Exception $e) {
-		echo "<div class='error'>Exception: " . $e->getMessage() ."</div>";
+		echo "<div class='alert alert-danger'><strong>Exception:</strong> " . $e->getMessage() ."</div>";
 		return False;
 	}
 }

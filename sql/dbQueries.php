@@ -1,5 +1,5 @@
 <?php
-require_once('dbinfo.php');
+require_once("dbinfo.php");
 
 /**************************************************
 	Local DB actions
@@ -22,6 +22,7 @@ require_once('dbinfo.php');
 	alterUser()
 	deleteUser()
 	isEmailUnique()
+	doesPasswordMatch()
 
 	-- Contacts --
 	getContact()
@@ -229,20 +230,29 @@ function setDefaultDID($userID, $didValue) {
 	}
 }
 
+/**************************************************
+	Create User
+
+	Adds a user to the database
+*/
 function createUser($vms_email, $vms_apiPassword, $userPassword) {
 	try {
 		$db = connectToDB();                                                 
 
+		// Hashing the user's password
+		$hashedPassword = password_hash(trim($userPassword), PASSWORD_BCRYPT);
+
 	    // -- Adding user to db --
 	    $query = "INSERT INTO `users` 
 			(`vms_email`, `vms_apiPassword`, `userPassword`) 
-			VALUES (:vms_email, :vms_apiPassword, SHA2(:userPassword,256))";
+			VALUES (:vms_email, :vms_apiPassword, :hashedUserPassword)";
 	
 		$add_stmt = $db->prepare($query);
 		$add_stmt->bindValue(":vms_email", trim($vms_email));
 		$add_stmt->bindValue(":vms_apiPassword", base64_encode(trim($vms_apiPassword)));
-		$add_stmt->bindValue(":userPassword", trim($userPassword));
+		$add_stmt->bindValue(":hashedUserPassword", $hashedPassword);
 		$add_stmt->execute();
+
 	} catch(Exception $e) {
 		echo "<div class='error'>Exception caught while adding contact to DB: ";
 		echo $e->getMessage() . "</div>";
@@ -251,7 +261,6 @@ function createUser($vms_email, $vms_apiPassword, $userPassword) {
 
 	return True;
 }
-
 
 /**************************************************
 	Get user API Credentials
@@ -322,21 +331,32 @@ function getUserFromLogin($vms_email, $userPassword) {
 	try {
 		$db = connectToDB();
 		
-		// Getting all of the contacts for this user
+		// Getting the user from their email
 		$query = "SELECT userID, vms_email, didID_default
 			FROM `users` WHERE 
-			vms_email=:vms_email AND userPassword=SHA2(:userPassword, 256)";
+			vms_email=:vms_email";
 
 		$select_stmt = $db->prepare($query);
 		$select_stmt->bindValue(":vms_email", $vms_email);
-		$select_stmt->bindValue(":userPassword", $userPassword);
 		$select_stmt->execute();
 		
 		// Grab all the data
 		if($select_stmt->rowCount() == 1) {
+
+			// User exists. Check if the password is correct
 			$userData = $select_stmt->fetchAll(PDO::FETCH_ASSOC);
-			return $userData;
+			if(doesPasswordMatch($userData[0]['userID'], $userPassword)) {
+
+				// Password matches
+				return $userData;
+			} else {
+
+				// No match here.
+				return False;
+			}
+
 		} else {
+			// User doesn't exist.
 			return False;
 		}
 	} catch(Exception $e) {
@@ -391,12 +411,14 @@ function alterUser($userID, $vms_apiPassword, $userPassword, $currentPassword) {
 				return False;
 
 			} else {
+				$hashedPassword = password_hash(trim($userPassword), PASSWORD_BCRYPT);
+
 				// Changing the user's password
-				$query = "UPDATE users SET userPassword = SHA2(:userPassword,256)
+				$query = "UPDATE users SET userPassword = :userPassword
 					WHERE userID = :userID";
 	
 				$stmt = $db->prepare($query);
-				$stmt->bindValue(":userPassword", trim($userPassword));     
+				$stmt->bindValue(":userPassword", $hashedPassword);     
 				$stmt->bindValue(":userID", $userID);     
 				$stmt->execute();
 				echo "<div class='alert alert-success'><strong>Success!</strong>
@@ -477,6 +499,45 @@ function isEmailUnique($vms_email) {
 		return False;
 	}
 }
+
+/**************************************************
+	Does Password Match
+
+	Given a user's ID, tests if the supplied password matches.
+*/
+function doesPasswordMatch($userID, $testPassword) {
+	// Getting all DIDs for this user
+	try {
+		$db = connectToDB();                                                 
+
+		// Fetching the user's hashed password from the DB
+		$stmt = $db->prepare("SELECT userID, userPassword
+			FROM users WHERE
+			userID =:userID"); 
+		$stmt->bindValue(":userID", $userID);           
+		$stmt->execute();
+
+		// Making sure we've got a match                                     
+		if($stmt->rowCount() == 0) {
+			error_log("Attempted to check if a user's password matched, but it doesn't.", 0);
+			return False;
+		}
+
+		// Fetching the true password of the user
+		$user = $stmt->fetch(PDO::FETCH_ASSOC); 
+		$originalPassword = $user['userPassword'];
+
+		// Testing if the new password matches
+		return password_verify($testPassword, $originalPassword);
+		
+	} catch(Exception $e) {
+		echo "<div class='error'>Exception caught: " . $e->getMessage() . "</div>";
+		return False;
+	}
+
+	return True;
+}
+
 
 /**************************************************
 	Get Contact
