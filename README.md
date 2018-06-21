@@ -56,11 +56,11 @@ vim sql/setup.sql
 
 ** Before **
 CREATE USER `voipSMS_user`@`INSERT_DATABASE_ADDRESS_HERE` IDENTIFIED BY 'INSERT_PASSWORD_HERE';
-GRANT DELETE,INSERT,INSERT,SELECT,UPDATE ON `voipSMS` . * TO `voipSMS_user`@`INSERT_DATABASE_ADDRESS_HERE';
+GRANT DELETE,INSERT,INSERT,SELECT,UPDATE ON `voipSMS` . * TO `voipSMS_user`@`INSERT_DATABASE_ADDRESS_HERE`;
 
 ** After **
 CREATE USER `voipSMS_user`@`localhost` IDENTIFIED BY 'my_secure_password';
-GRANT DELETE,INSERT,INSERT,SELECT,UPDATE ON `voipSMS` . * TO `voipSMS_user`@`localhost';
+GRANT DELETE,INSERT,INSERT,SELECT,UPDATE ON `voipSMS` . * TO `voipSMS_user`@`localhost`;
 ```
 
 Now that you have your database configuration prepared, you can go ahead and run the setup.sql script. This will create the database, tables, and mysql user for the application. 
