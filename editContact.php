@@ -79,6 +79,7 @@ require_once("pageTop.php");
 <body>
 	<?php 
 	include_once("header.php"); 
+	echo "<div class='container py-2 my-2 rounded'>";
 	echo "<div id='formErrorMessage'></div>";
 
 	// Checking if we're logged in
@@ -152,7 +153,9 @@ require_once("pageTop.php");
 			}
 		}
 	}
+	echo "</div>";
 	?>
+
 </body>
 <?php require_once("pageBottom.php"); ?>
 

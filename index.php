@@ -12,21 +12,21 @@ function writeLoggedOutMessage() {
 	echo '<p>
 		<a href="http://voip.ms/">voip.ms</a> offers a great API to compliment their VOIP service.
 		In addition, they also offer an SMS service, which also fully interfaces with their API. 
-
-		However, their desktop SMS center is lacking. For example...
 	</p>
-		<ul>
-			<li>You must manually refresh if you want to check for new incoming SMS messages.</li>
-			<li>They offer no support for a contacts list. You must remember phone numbers manually, or look them up through other means.</li>
-			<li>The canon voip.ms SMS center is bland and unintuitive.</li>
-		</ul>
 
 	<p>
 		voipSMS is an interface to the voip.ms API. 
-		You can send and recieve SMS (text) messages using voipSMS, with a cleaner, more functional interface than voip.ms\' built-in SMS center.
+		You can send and recieve SMS (text) messages using voipSMS, with a cleaner, more functional interface than voip.ms\' built-in SMS center. Some of the benefits of this site include...
+		<ul>
+			<li>Support for a contacts list.</li>
+			<li>Easy switching between DIDs when messaging.</li>
+			<li>Searching for conversations.</li>
+			<li>FOSS!</li>
+		</ul>
 	</p>
 	<p>
-		<a href="register.php">Register</a> today!
+		<a href="register.php">Register</a> today! Or,
+		<a href="https://github.com/zachRudz/voipSMS">check this project out on github</a>!
 	</p> ';
 	echo "</div>";
 }
