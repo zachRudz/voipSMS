@@ -22,7 +22,7 @@ CREATE TABLE users (
 CREATE TABLE dids(
 	didID INT AUTO_INCREMENT,
 	ownerID INT NOT NULL, 
-	did VARCHAR(12) NOT NULL,
+	did VARCHAR(15) NOT NULL,
 
 	PRIMARY KEY (didID),
 	FOREIGN KEY (ownerID) REFERENCES users(userID)
@@ -34,7 +34,7 @@ CREATE TABLE contacts(
 	ownerID INT NOT NULL,
 	firstName VARCHAR(128),
 	lastName VARCHAR(128),
-	did VARCHAR(12) NOT NULL,
+	did VARCHAR(15) NOT NULL,
 	notes VARCHAR(1024),
 
 	PRIMARY KEY (contactID),
