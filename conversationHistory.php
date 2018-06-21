@@ -38,7 +38,7 @@ function displayConversationSearchForm() {
 	$dids = getDIDs($_SESSION['auth_info']['userID']);
 
 	echo "
-		<h1 class='h3 my-3 font-weight-normal'>Search for a Conversation</h3>
+		<h1 class='h3 font-weight-normal'>Search for a Conversation</h3>
 		<form action='sms.php' method='post' 
 			name='conversationSearch' onsubmit='return validateConversationSearch()'>
 

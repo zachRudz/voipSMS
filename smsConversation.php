@@ -29,8 +29,8 @@ require_once("sql/dbQueries.php");
 */
 function displaySMSConversationSearchForm($target) {
     echo "
-    <div class='container-fluid rounded border border-primary'>
-    <h1 class='h3 my-3 font-weight-normal'>Filter this conversation</h3>
+    <div class='container py-2 my-2 rounded'>
+    <h1 class='h3 font-weight-normal'>Filter this conversation</h3>
 
     <form action='sms.php' method='get'
         name='conversationFilter' onsubmit='return validateConversationFilter()()'>
@@ -144,7 +144,7 @@ function getConversation($userID, $from, $to, $did, $contact, $limit) {
 	spicey neato HTML
 */
 function displayConversationHistory($conversation) {
-	echo "<div id='conversation' class='container-fluid rounded border border-primary'>";
+	echo "<div id='conversation' class='container py-2 my-2 rounded'>";
 
 	// Making sure that there's actually some SMS messages to parse
 	if($conversation['status'] == "no_sms") {
@@ -304,7 +304,7 @@ function displayContactPaneContacts($userID) {
 */
 function displayContactPane($userID, $currentContact) {
 	// Begin building the pane
-    echo "<div id='didOptionsContainer' class='container-fluid rounded border border-primary'>";
+    echo "<div id='didOptionsContainer' class='container py-2 my-2 rounded'>";
 	echo "<h3>DID Options</h3>";
 
 	// Printing active DID selection form
@@ -330,7 +330,7 @@ function displayContactPane($userID, $currentContact) {
     </div>";
 
 	// Get all of the user's contacts
-    echo "<div id='contactsContainer' class='container-fluid rounded border border-primary'>";
+    echo "<div id='contactsContainer' class='container py-2 my-2 rounded'>";
 	echo "<h3>Contacts</h3>";
 	displayContactPaneContacts($userID); 
 
@@ -344,7 +344,7 @@ function displayContactPane($userID, $currentContact) {
 */
 function displaySendSMSForm($target) {
 	echo "
-    <div id='didOptionsContainer' class='container-fluid rounded border border-primary'>
+    <div id='didOptionsContainer' class='container py-2 my-2 rounded'>
 		<h1 class='h4 font-weight-normal'>
 			Send a message to ${target} from " . $_SESSION['auth_info']['activeDID'] . "
 		</h1>

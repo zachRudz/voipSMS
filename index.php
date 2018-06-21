@@ -8,7 +8,7 @@ require_once("sql/dbQueries.php");
 	Link them to the register page.
 */
 function writeLoggedOutMessage() {
-	echo "<div class='information'>";
+	echo "<div class='container py-2 my-2 rounded'>";
 	echo '<p>
 		<a href="http://voip.ms/">voip.ms</a> offers a great API to compliment their VOIP service.
 		In addition, they also offer an SMS service, which also fully interfaces with their API. 
@@ -37,7 +37,7 @@ function writeLoggedOutMessage() {
 	
 */
 function writeLoggedInMessage() {
-	echo "<div class='information'>";
+	echo "<div class='container py-2 my-2 rounded'>";
 	echo '<p>
 		Welcome back, friendo.
 	</p>
@@ -72,13 +72,13 @@ require_once("pageTop.php")
 	include_once("header.php");
 
 	// If the user is logged out, write the greeting message
-	// Otherwise, write the SMS center in the body of the page
+	// Otherwise, write the SMS center in the <body class=background-color:#c9c9c9' of the page
 	if(!isset($_SESSION['auth'])) {
 		writeLoggedOutMessage();
 	} else {
 		writeLoggedInMessage();
 	}
 ?>
-</body>
+</<body class=background-color:#c9c9c9'>
 <?php require_once("pageBottom.php"); ?>
 </html>

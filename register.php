@@ -11,7 +11,9 @@ require_once('vms_api.php');
 function printRegistrationForm() {
 	// Let the user know that they need to enable API access on their
 	//		voip.ms account before registering.
-	echo '<div class="alert alert-warning">
+	echo '<div class="container py-2 my-2 rounded">
+	<h3>Before we begin...</h3>
+	<div class="alert alert-warning">
 		<div>
 			Note: The VoIP.ms API is not setup by default. Prior to registration, you must follow the below
 			steps to ensure that this website can interface with your VoIP.ms account.
@@ -25,7 +27,7 @@ function printRegistrationForm() {
 		
 
 		echo '
-		<div>Enabling VoIP.ms API Access</div>
+		<div><strong>Enabling VoIP.ms API Access</strong></div>
 		<div>
 			You must enable API access
 			on your VoIP.ms account before registering. You can allow the 
@@ -39,7 +41,7 @@ function printRegistrationForm() {
 				the API Access</li>
 		</ol>
 
-		<div>Whitelisting the IP of this server</div>
+		<div><strong>Whitelisting the IP of this server</strong></div>
 		In addition, you also have to whitelist the IP Address of this server ('. $_SERVER['SERVER_ADDR'] . ') for API access.
 		Alternatively, you can whitelist all IP Addresses (0.0.0.0).
 		<ol>		
@@ -48,10 +50,14 @@ function printRegistrationForm() {
 		    <li>Enter the IP Address you want to whitelist in the field labeled "Enable IP Address".</li>
 		    <li>Click "Save IP Addresses" to save the changes.</li>
 		</ol>
+	</div>
 	';
+	echo '</div>';
 
 	// Registration form
-	echo ' <form name="register" action="register.php" method="POST" 
+	echo ' 
+	<div class="container py-2 my-2 rounded">
+	<form name="register" action="register.php" method="POST" 
 		onsubmit="return validateRegister()">
 
 	<h3>voip.ms Account Information</h3>
@@ -77,6 +83,8 @@ function printRegistrationForm() {
 
 	<button type="submit" class="btn btn-primary">Submit</button>
 	</form> ';
+
+	echo '</div>';
 }
 
 /**************************************************

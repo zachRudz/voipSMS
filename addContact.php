@@ -7,7 +7,7 @@ require_once('sql/dbQueries.php');
 */
 function printAddContactForm() {
 	echo '
-	<h1 class="h3 my-3 font-weight-normal">Add a contact</h1>
+	<h1 class="h3 font-weight-normal">Add a contact</h1>
 
 	<form action="addContact.php" method="POST"
 		name="addContact" onsubmit="return validateAddContact()">
@@ -115,6 +115,7 @@ require_once("pageTop.php");
 <body>
 <?php 
 	include_once("header.php");
+	echo "<div class='container py-2 my-2 rounded'>";
 	echo "<div id='formErrorMessage'></div>";
 
 	// Make sure the user is actually logged in
@@ -130,6 +131,7 @@ require_once("pageTop.php");
 			printAddContactForm();
 		}
 	}
+	echo "</div>";
 ?>
 </body>
 <?php require_once("pageBottom.php"); ?>

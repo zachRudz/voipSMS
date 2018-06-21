@@ -151,7 +151,7 @@ require_once("imports/datatables_css.php");
 					Also display the form to let them to filter again.
 				
 			***************************************************************************/
-			echo "<div class='container-fluid rounded border border-primary'>";
+			echo "<div class='container py-2 my-2 rounded'>";
 			displayConversationSearchForm();
 			if($_SERVER['REQUEST_METHOD'] == "POST") {
 

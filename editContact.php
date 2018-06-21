@@ -22,7 +22,7 @@ function displayEditContactForm($contactID) {
 	}
 
     echo "
-    <h1 class='h3 my-3 font-weight-normal'>Add a contact</h1>
+    <h1 class='h3 font-weight-normal'>Add a contact</h1>
 
 	<form action='editContact.php' method='POST'
 		name='editContact' onsubmit='return validateEditContact()'>

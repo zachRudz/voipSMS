@@ -83,6 +83,7 @@ require_once("imports/datatables_css.php");
 <body>
 <?php 
 	include_once("header.php");
+	echo '<div class="container py-2 my-2 rounded">';
 	echo "<div id='formErrorMessage'></div>";
 
 	// Tell off the user if they're not logged in
@@ -100,6 +101,8 @@ require_once("imports/datatables_css.php");
 		echo '<div class="alert alert-danger">'; 
 		echo "Error: You can't add a contact while you're logged out.</div>";
 	}
+
+	echo "</div>";
 ?>
 </body>
 <?php 

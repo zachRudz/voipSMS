@@ -35,8 +35,8 @@ function displayAccountForm($userID) {
 	
 	// Begin printing the update user info form
 	echo "
-	<div class='container-fluid rounded border border-primary'>
-	<h1 class='h3 my-3 font-weight-normal'>Edit Account Information</h3>
+	<div class='container py-2 my-2 rounded'>
+	<h1 class='h3 font-weight-normal'>Edit Account Information</h3>
 	<p>Empty fields will be left unchanged. </p>
 
 	<form action='account.php' method='POST'
@@ -78,8 +78,8 @@ function displayAccountForm($userID) {
 
 	// Begin printing syncDIDs form
 	echo "
-	<div class='container-fluid rounded border border-primary'>
-	<h1 class='h3 my-3 font-weight-normal'>Sync DIDs with VoIP.MS</h3>
+	<div class='container py-2 my-2 rounded'>
+	<h1 class='h3 font-weight-normal'>Sync DIDs with VoIP.MS</h3>
 	<form action='account.php' method='POST' name='syncDids'>
 		<input type='submit' name='submit' value='Sync DIDs' />
 	</form>
@@ -87,8 +87,8 @@ function displayAccountForm($userID) {
 
 	// Begin printing delete account
 	echo "
-	<div class='container-fluid rounded border border-primary'>
-	<h1 class='h3 my-3 font-weight-normal'>Delete account</h3>
+	<div class='container py-2 my-2 rounded'>
+	<h1 class='h3 font-weight-normal'>Delete account</h3>
 	<div>To delete your account, enter your current password.</div>
 	<div class='alert alert-warning'><strong>Warning!</strong> 
 		This action cannot be undone!</div>

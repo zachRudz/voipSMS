@@ -14,8 +14,8 @@ function printLoginPage($message = null) {
 
 	// Login form
 	echo '
-	<form class="container" action="login.php" method="POST">
-		<h1 class="h3 my-3 font-weight-normal">Sign in</h1>
+	<form class="container py-2 my-2 rounded" action="login.php" method="POST">
+		<h1 class="h3 font-weight-normal">Sign in</h1>
 		<div class="form-group">
 			<label for="emailInput">Email Address</label>
 			<input type="email" class="form-control" id="emailInput" aria-describedby="emailHelp" placeholder="Enter email" name="vms_email" required />
