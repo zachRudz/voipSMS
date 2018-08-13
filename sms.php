@@ -10,7 +10,7 @@ require_once("imports/datatables_css.php");
 	<title>voipSMS: SMS Center</title>
 
 </head>
-<body onload="scrollToBottom()">
+<body>
 <?php 
 	include_once("header.php");
 	// Make sure we're logged in
@@ -213,14 +213,14 @@ require_once("imports/datatables_css.php");
 
 <script>
 	// JQuery DataTable stuff for the contact pane
-	$(document).ready(function(){
+	$(document).on("ready", function(){
 		$('#contactPaneContacts').DataTable({
 			"pageLength": 25
 		});
 	});
 
 	// JQuery DataTable stuff for the conversation history search
-	$(document).ready(function(){
+	$(document).on("ready", function(){
 		$('#conversations').DataTable({
 			"pageLength": 25
 		});
@@ -231,9 +231,9 @@ require_once("imports/datatables_css.php");
 	 This is because the newest texts should be at the bottom of the page; 
 	 Which the user prolly wants to see.
 	*/
-	function scrollToBottom() {
+	$(window).on("load", function(){
 		window.scrollTo(0,document.body.scrollHeight);
-	}
+	});
 </script>
 
 <script src="js/smsValidation.js"></script>
