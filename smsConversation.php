@@ -353,7 +353,7 @@ function displaySendSMSForm($target) {
 			<input type='hidden' name='target' value='{$target}' />
 			
 			<textarea id='sendSMS' class='form-control' name='message' maxlength='160' 
-				required placeholder='Send an SMS...'></textarea>
+				required placeholder='Send an SMS...' autofocus></textarea>
 
 			<input class='btn btn-primary' type='submit' name='send' value='Send' />
 			<a href='sms.php?target={$target}'>
