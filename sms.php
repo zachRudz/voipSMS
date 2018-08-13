@@ -212,27 +212,24 @@ require_once("imports/datatables_css.php");
 <?php require_once("imports/datatables.php"); ?>
 
 <script>
-	// JQuery DataTable stuff for the contact pane
-	$(document).on("ready", function(){
+	$(document).ready(function(){
+		// JQuery DataTable stuff for the contact pane
 		$('#contactPaneContacts').DataTable({
 			"pageLength": 25
 		});
-	});
 
-	// JQuery DataTable stuff for the conversation history search
-	$(document).on("ready", function(){
+		// JQuery DataTable stuff for the conversation history search
 		$('#conversations').DataTable({
 			"pageLength": 25
 		});
-	});
-	/**************************************************
-	 Spicey scriptaroonie to jump to the bottom of the webpage when the page loads
 
-	 This is because the newest texts should be at the bottom of the page; 
-	 Which the user prolly wants to see.
-	*/
-	$(window).on("load", function(){
-		window.scrollTo(0,document.body.scrollHeight);
+		/**************************************************
+		 Spicey scriptaroonie to jump to the bottom of the webpage when the page loads
+
+		 This is because the newest texts should be at the bottom of the page; 
+		 Which the user prolly wants to see.
+		*/
+			window.scrollTo(0,document.body.scrollHeight);
 	});
 </script>
 
